@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Renderer-focused smoke test (optional; Lead owns the full E2E).
+ * Renderer-focused smoke test (the full E2E lives in test/e2e.mjs).
  *
  * Serves the project root over HTTP, opens `test/render/harness.html` in
  * headless Chrome and prints the harness results. The harness exercises the

@@ -1,18 +1,18 @@
-# MD Reader Pro — 内部构建契约（团队共享）
+# MD Reader Pro — 开发与模块契约
 
-> 这是并行开发时唯一的接口约定。任何跨模块的改动必须先改本文件并通知 Lead。
+> 本文档描述各模块的职责、公共接口与 DOM 契约，供贡献者参考。跨模块接口变更时请同步更新本文档。
 > 项目根目录：`md-reader-pro/`，所有命令都在该目录执行。
 
-## 1. 目录与写入范围（write scopes）
+## 1. 模块与职责
 
-| 范围 | 负责人 | 文件 |
-| --- | --- | --- |
-| 渲染器 | `renderer-dev` | `src/render/**`、`test/render/**` |
-| 阅读 UI | `ui-dev` | `src/ui/**`、`src/viewer/**`、`src/popup/**`、`src/options/**` |
-| 扩展外壳 | `shell-dev` | `src/content/**`、`src/background/**`、`manifest.json`、`README.md` |
-| 构建 / 共享 / 测试 | `lead` | `build.mjs`、`package.json`、`src/shared/**`、`test/e2e.mjs`、`src/samples/**`、`scripts/**` |
+| 模块 | 目录 |
+| --- | --- |
+| Markdown 渲染 | `src/render/**`、`test/render/**` |
+| 阅读界面 / 设置 UI | `src/ui/**`、`src/viewer/**`、`src/popup/**`、`src/options/**` |
+| 扩展外壳 | `src/content/**`、`src/background/**`、`manifest.json` |
+| 构建 / 共享 / 测试 | `build.mjs`、`package.json`、`src/shared/**`、`test/e2e.mjs`、`src/samples/**`、`scripts/**` |
 
-不要修改别人范围内的文件。共享文件（`src/shared/**`）只读，需要新增内容先找 Lead。
+`src/shared/**` 提供设置、i18n 与通用工具，修改时请确认三个入口（content / viewer / options）仍然兼容。
 
 ## 2. 构建产物（`dist/`，由 `build.mjs` 生成，勿手写）
 
@@ -211,11 +211,11 @@ ReaderApp = {
 
 ```bash
 npm run build   # 生成 dist/
-npm test        # Puppeteer 端到端（Lead 维护）
+npm test        # Puppeteer 端到端（需 Chrome for Testing）
 npm run zip     # 打包 dist 为 zip
 ```
 
 各自完成后至少自查：
 - `npm run build` 无报错；
 - 用 `python3 -m http.server` 打开 `src/samples/sample.md`（或自建 fixture）人工/脚本验证；
-- 不引入新的裸依赖（需新增依赖先通知 Lead，由 Lead 改 package.json 并安装）。
+- 不引入新的裸依赖；新增依赖请同时更新 `package.json` 与 `package-lock.json`。

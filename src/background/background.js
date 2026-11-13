@@ -1,7 +1,7 @@
 /**
  * MD Reader Pro — MV3 service worker.
  *
- * Responsibilities (contract docs/CONTRACT.md §5):
+ * Responsibilities (see docs/CONTRACT.md §5):
  *  - seed default settings on install;
  *  - context menu ("以 Markdown 阅读") and the Alt+Shift+M command;
  *  - route popup / viewer requests;

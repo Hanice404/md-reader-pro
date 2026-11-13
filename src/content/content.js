@@ -2,7 +2,7 @@
  * MD Reader Pro — content script.
  *
  * Detects Markdown documents, takes over the page and mounts the reader UI.
- * Contract: docs/CONTRACT.md §5; owner: shell-dev.
+ * Contract: docs/CONTRACT.md §5.
  *
  * Design notes
  * ------------

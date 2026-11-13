@@ -1,5 +1,5 @@
 /**
- * Standalone viewer page (owner: ui-dev).
+ * Standalone viewer page.
  *
  * Works both as an extension page and as a plain static page (serve dist/
  * over http to test). The empty state, loading and error handling live here;

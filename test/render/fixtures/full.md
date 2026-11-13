@@ -1,6 +1,6 @@
 ---
 title: MD Reader Pro 渲染器综合示例
-author: renderer-dev
+author: MD Reader Pro
 date: 2026-11-11
 tags: [markdown, renderer, test]
 description: 渲染器自检用的综合文档，覆盖 docs/CONTRACT.md §3 的 DOM 契约。

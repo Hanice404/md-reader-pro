@@ -1,5 +1,5 @@
 /**
- * MD Reader Pro — Markdown renderer (owner: renderer-dev).
+ * MD Reader Pro — Markdown renderer.
  *
  * Public contract: docs/CONTRACT.md §3.
  *

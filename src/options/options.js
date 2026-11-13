@@ -1,5 +1,5 @@
 /**
- * Options page (owner: ui-dev).
+ * Options page.
  * Every control is bound to src/shared/settings.js; changes apply instantly
  * and sync to open reader surfaces through storage.
  */

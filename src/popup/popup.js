@@ -1,5 +1,5 @@
 /**
- * Browser action popup (owner: ui-dev).
+ * Browser action popup.
  * Shows the current tab, its render state and the primary action, plus
  * quick access to the standalone viewer and reading themes.
  */
