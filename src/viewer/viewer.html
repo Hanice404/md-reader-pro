@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="zh-CN" data-md-reader="viewer" data-md-theme="auto">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>MD Reader Pro · 优雅阅读 Markdown</title>
+    <link rel="stylesheet" href="./reader.css" />
+  </head>
+  <body class="md-viewer-body">
+    <div class="md-viewer-shell" id="md-viewer-shell">
+      <header class="md-viewer-topbar">
+        <a class="md-viewer-brand" href="./viewer.html" aria-label="MD Reader Pro">
+          <span class="md-logo-mark" aria-hidden="true">M<span>↓</span></span>
+          <span class="md-brand-text">
+            <span class="md-brand-name">MD Reader <b>Pro</b></span>
+            <span class="md-brand-sub" data-i18n="viewerEyebrow">本地渲染 · 离线 · 不上传</span>
+          </span>
+        </a>
+        <div class="md-viewer-topbar-actions">
+          <button
+            type="button"
+            class="md-btn"
+            id="viewer-theme"
+            data-tip="切换主题"
+            data-i18n-title="viewerThemeHint"
+            aria-label="切换主题"
+          ></button>
+          <button
+            type="button"
+            class="md-btn"
+            id="viewer-settings"
+            data-tip="设置"
+            data-i18n-title="settings"
+            aria-label="设置"
+          ></button>
+        </div>
+      </header>
+
+      <main class="md-viewer-empty md-viewer-hero" id="md-viewer-empty">
+        <div class="md-viewer-hero-inner">
+          <p class="md-viewer-eyebrow">
+            <span class="md-viewer-dot" aria-hidden="true"></span>
+            <span data-i18n="viewerEyebrow">本地渲染 · 离线 · 不上传</span>
+          </p>
+          <h1 class="md-viewer-title" data-i18n-html="viewerHeadline">
+            把 Markdown<br /><em>读成</em>一篇文章
+          </h1>
+          <p class="md-viewer-subtitle" data-i18n-html="viewerSubtitle">
+            拖入文件、粘贴文本，或打开任意 <code>.md</code> 链接。支持 GFM、数学公式、Mermaid 图表、代码高亮、目录与多套主题。
+          </p>
+
+          <div
+            class="md-dropzone"
+            id="md-dropzone"
+            tabindex="0"
+            role="button"
+            aria-label="选择或拖入 Markdown 文件"
+          >
+            <span class="md-dropzone-icon" id="md-dropzone-icon" aria-hidden="true"></span>
+            <span class="md-dropzone-text">
+              <span class="md-dropzone-title" data-i18n="dropzoneTitle">把 .md 文件拖到这里</span>
+              <span class="md-dropzone-hint" data-i18n="dropzoneHint"
+                >或点击选择文件 · 支持 .md / .markdown / .mdx / .txt</span
+              >
+            </span>
+            <span class="md-dropzone-cta" data-i18n="dropzoneCta">选择文件</span>
+          </div>
+
+          <div class="md-viewer-actions">
+            <button type="button" class="md-primary-btn" id="md-pick-file">
+              <span class="md-viewer-btn-icon" id="md-pick-icon" aria-hidden="true"></span>
+              <span data-i18n="openLocalFile">打开本地文件</span>
+            </button>
+            <button type="button" class="md-ghost-btn" id="md-paste">
+              <span class="md-viewer-btn-icon" id="md-paste-icon" aria-hidden="true"></span>
+              <span data-i18n="pasteMarkdown">粘贴 Markdown</span>
+            </button>
+            <button type="button" class="md-ghost-btn" id="md-open-sample">
+              <span class="md-viewer-btn-icon" id="md-sample-icon" aria-hidden="true"></span>
+              <span data-i18n="openSample">查看示例</span>
+            </button>
+          </div>
+
+          <div class="md-viewer-error" id="md-viewer-error" hidden role="alert"></div>
+
+          <div class="md-viewer-hints">
+            <span class="md-viewer-hint">
+              <span class="md-kbd">Alt</span><span>+</span><span class="md-kbd">Shift</span
+              ><span>+</span><span class="md-kbd">M</span>
+              <span data-i18n="viewerHintShortcut">在任意页面切换 Markdown 阅读</span>
+            </span>
+            <span class="md-viewer-hint" data-i18n="viewerHintFileAccess"
+              >阅读本地文件：在扩展详情中开启「允许访问文件网址」</span
+            >
+          </div>
+        </div>
+
+        <div class="md-viewer-paper-wrap" aria-hidden="true">
+          <div class="md-viewer-paper">
+            <div class="md-viewer-paper-meta"><span>MD</span><span>reading.md</span></div>
+            <p class="md-viewer-paper-title">Reading,<br />without noise.</p>
+            <p class="md-viewer-paper-sub">A calm surface for long-form Markdown.</p>
+            <div class="md-viewer-paper-lines">
+              <span class="md-viewer-paper-line"></span>
+              <span class="md-viewer-paper-line"></span>
+              <span class="md-viewer-paper-line is-short"></span>
+            </div>
+            <blockquote class="md-viewer-paper-quote">
+              “Text should step back so the reader only sees the idea.”
+            </blockquote>
+            <pre class="md-viewer-paper-code"><code><b>const</b> reader = <i>createReader</i>();
+reader.render(markdown);</code></pre>
+            <div class="md-viewer-paper-footer">
+              <span>2 min read</span>
+              <span class="md-viewer-paper-dots">
+                <span class="is-active"></span><span></span><span></span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="md-viewer-footer">
+        <span data-i18n-html="viewerFooterLeft">MD Reader Pro <b>v1.0.0</b></span>
+        <span data-i18n="viewerFooterRight">CommonMark · GFM · KaTeX · Mermaid</span>
+      </footer>
+    </div>
+
+    <div id="md-reader-mount" class="md-viewer-mount" hidden></div>
+
+    <div class="md-viewer-loading" id="md-viewer-loading" hidden role="status" aria-live="polite">
+      <span class="md-spinner" aria-hidden="true"></span>
+      <span data-i18n="viewerLoading">正在准备阅读界面…</span>
+    </div>
+
+    <input
+      type="file"
+      id="md-file-input"
+      accept=".md,.markdown,.mdown,.mkd,.mdx,.txt,text/markdown,text/plain"
+      hidden
+    />
+
+    <dialog class="md-dialog" id="md-paste-dialog" aria-labelledby="md-paste-title">
+      <form class="md-dialog-inner" id="md-paste-form" method="dialog">
+        <h2 class="md-dialog-title" id="md-paste-title" data-i18n="pasteTitle">粘贴 Markdown</h2>
+        <p class="md-dialog-desc" data-i18n="pasteDesc">
+          把 Markdown 文本粘贴到下面，点击「开始阅读」即可渲染。内容只在本机处理。
+        </p>
+        <textarea
+          class="md-dialog-textarea"
+          id="md-paste-text"
+          spellcheck="false"
+          data-i18n-placeholder="pastePlaceholder"
+          placeholder="# 在这里粘贴 Markdown…"
+        ></textarea>
+        <div class="md-dialog-actions">
+          <button type="button" class="md-quiet-btn" id="md-paste-cancel" data-i18n="cancel">
+            取消
+          </button>
+          <button type="submit" class="md-primary-btn" id="md-paste-confirm" data-i18n="startReading">
+            开始阅读
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <div class="md-toast" id="md-toast" role="status" hidden></div>
+    <script src="./viewer.js"></script>
+  </body>
+</html>

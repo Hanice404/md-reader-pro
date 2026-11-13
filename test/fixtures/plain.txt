@@ -1,0 +1,12 @@
+# Plain text Markdown
+
+This text file has several signals: a heading, a list, a link and a fence.
+
+- first
+- second
+
+[link](https://example.com)
+
+```js
+const a = 1;
+```

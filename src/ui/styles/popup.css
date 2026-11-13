@@ -1,0 +1,403 @@
+/* ============================================================
+   MD Reader Pro — browser action popup (360px)
+   ============================================================ */
+
+html[data-md-reader="surface"] {
+  width: 360px;
+  background: var(--md-bg) !important;
+}
+
+.md-popup-body {
+  width: 360px;
+  margin: 0;
+  background: var(--md-bg);
+  color: var(--md-text);
+  font-family: var(--md-font-sans);
+}
+
+.md-popup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  background:
+    radial-gradient(340px 180px at 88% -6%, var(--md-accent-soft), transparent 72%),
+    var(--md-bg);
+}
+
+.md-popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 2px 2px 4px;
+}
+
+.md-popup-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.md-popup-name {
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.25;
+  color: var(--md-text-strong);
+  letter-spacing: -0.005em;
+}
+
+.md-popup-name b {
+  color: var(--md-accent);
+  font-weight: 700;
+}
+
+.md-popup-tagline {
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--md-faint);
+}
+
+.md-popup-card {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 13px;
+  border: 1px solid var(--md-border-soft);
+  border-radius: var(--md-radius-lg);
+  background: var(--md-surface);
+  box-shadow: var(--md-shadow-xs);
+}
+
+.md-popup-label {
+  color: var(--md-faint);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.md-popup-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.md-popup-label-hint {
+  color: var(--md-faint);
+  font-size: 10.5px;
+}
+
+/* ---------------------------------------------------------------- page row */
+.md-popup-page {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.md-popup-favicon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  border: 1px solid var(--md-border-soft);
+  border-radius: var(--md-radius-sm);
+  background: var(--md-surface-muted);
+  color: var(--md-muted);
+  overflow: hidden;
+}
+
+.md-popup-favicon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  border-radius: 2px;
+}
+
+.md-popup-page-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.md-popup-page-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: var(--md-text-strong);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.md-popup-page-url {
+  overflow: hidden;
+  color: var(--md-faint);
+  font-family: var(--md-font-mono);
+  font-size: 10px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.md-status-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 9px;
+  border-radius: var(--md-radius-sm);
+  background: var(--md-surface-muted);
+  color: var(--md-muted);
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.md-status-dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--md-faint);
+}
+
+.md-popup-status-card[data-state="detecting"] .md-status-dot {
+  background: var(--md-faint);
+  animation: md-pulse 1.4s ease-in-out infinite;
+}
+
+.md-popup-status-card[data-state="ready"] .md-status-row {
+  background: var(--md-alert-tip-bg);
+  color: var(--md-alert-tip);
+}
+
+.md-popup-status-card[data-state="ready"] .md-status-dot {
+  background: var(--md-alert-tip);
+}
+
+.md-popup-status-card[data-state="rendered"] .md-status-row {
+  background: var(--md-accent-soft);
+  color: var(--md-accent);
+}
+
+.md-popup-status-card[data-state="rendered"] .md-status-dot {
+  background: var(--md-accent);
+}
+
+.md-popup-status-card[data-state="warn"] .md-status-row {
+  background: var(--md-alert-warning-bg);
+  color: var(--md-alert-warning);
+}
+
+.md-popup-status-card[data-state="warn"] .md-status-dot {
+  background: var(--md-alert-warning);
+}
+
+.md-popup-status-card[data-state="blocked"] .md-status-row {
+  background: var(--md-alert-caution-bg);
+  color: var(--md-alert-caution);
+}
+
+.md-popup-status-card[data-state="blocked"] .md-status-dot {
+  background: var(--md-alert-caution);
+}
+
+@keyframes md-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.md-popup-hint {
+  margin: 0;
+  color: var(--md-muted);
+  font-size: 10.5px;
+  line-height: 1.6;
+}
+
+.md-popup-hint code {
+  padding: 0 3px;
+  font-family: var(--md-font-mono);
+  font-size: 0.94em;
+}
+
+/* ---------------------------------------------------------------- actions */
+.md-popup-actions {
+  gap: 8px;
+}
+
+.md-popup-action-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.md-popup-action {
+  min-height: 34px;
+  padding: 7px 8px;
+  color: var(--md-text-strong);
+  font-size: 12px;
+  gap: 6px;
+}
+
+.md-popup-action .md-icon {
+  width: 15px;
+  height: 15px;
+  color: var(--md-muted);
+}
+
+/* ---------------------------------------------------------------- themes */
+.md-theme-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.md-theme-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 4px 6px;
+  border: 1px solid var(--md-border);
+  border-radius: var(--md-radius-sm);
+  background: var(--md-surface);
+  color: var(--md-muted);
+  font-family: var(--md-font-sans);
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: transform var(--md-dur-fast) var(--md-ease);
+}
+
+.md-theme-chip:hover {
+  border-color: var(--md-accent-line);
+  color: var(--md-text-strong);
+  transform: translateY(-1px);
+}
+
+.md-theme-chip.is-active {
+  border-color: var(--md-accent);
+  background: var(--md-accent-soft);
+  color: var(--md-accent);
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px var(--md-accent);
+}
+
+.md-theme-swatch {
+  display: block;
+  width: 100%;
+  height: 22px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.md-theme-swatch[data-swatch="light"] {
+  background: linear-gradient(135deg, #ffffff 0 55%, #e9e7e1 55% 100%);
+}
+
+.md-theme-swatch[data-swatch="dark"] {
+  background: linear-gradient(135deg, #1a1f1d 0 55%, #0d100f 55% 100%);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.md-theme-swatch[data-swatch="sepia"] {
+  background: linear-gradient(135deg, #fbf5e8 0 55%, #eadfc9 55% 100%);
+}
+
+.md-theme-swatch[data-swatch="auto"] {
+  background: linear-gradient(135deg, #ffffff 0 50%, #1a1f1d 50% 100%);
+}
+
+/* ---------------------------------------------------------------- footer */
+.md-popup-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 2px 2px 0;
+  color: var(--md-faint);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.md-popup-shortcut {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.md-popup-shortcut .md-kbd {
+  min-width: 16px;
+  padding: 0 4px;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.md-popup-version {
+  font-family: var(--md-font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.02em;
+}
+
+.md-popup .md-toast {
+  bottom: 14px;
+  font-size: 12px;
+}
+
+.md-popup-page-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--md-muted);
+}
+
+.md-popup-page-icon .md-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.md-popup-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.md-popup-btn-icon .md-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.md-popup-action-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.md-popup-header .md-btn[data-tip]::after {
+  left: auto;
+  right: 0;
+  transform: translateY(-3px);
+}
+
+.md-popup-header .md-btn[data-tip]:hover::after,
+.md-popup-header .md-btn[data-tip]:focus-visible::after {
+  transform: translateY(0);
+}

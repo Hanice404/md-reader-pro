@@ -1,0 +1,8 @@
+{
+  "extName": { "message": "MD Reader Pro" },
+  "extDesc": { "message": "A fast, beautiful, fully offline Markdown reader for Chrome. CommonMark/GFM, math, diagrams, TOC and themes." },
+  "actionTitle": { "message": "MD Reader Pro — read Markdown in your browser" },
+  "cmdToggle": { "message": "Read the current page as Markdown" },
+  "contextMenuRead": { "message": "Read as Markdown" },
+  "fileAccessHint": { "message": "Enable “Allow access to file URLs” on this extension's details page and try again." }
+}

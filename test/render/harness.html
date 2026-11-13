@@ -1,0 +1,865 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MD Reader Pro · 渲染器自检</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body {
+      margin: 0;
+      padding: 24px 28px 80px;
+      font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      background: #0f1115;
+      color: #e6e8ee;
+    }
+    h1 { font: 700 18px/1.3 ui-sans-serif, system-ui, sans-serif; margin: 0 0 4px; }
+    .sub { color: #8b93a7; margin: 0 0 20px; font-family: ui-sans-serif, system-ui, sans-serif; }
+    #summary { position: sticky; top: 0; z-index: 2; padding: 10px 14px; margin: 0 -14px 16px; border-radius: 10px; background: #171a21; border: 1px solid #262b36; font: 600 14px/1.4 ui-sans-serif, system-ui, sans-serif; }
+    #summary.ok { color: #3fb950; border-color: #1f6f33; }
+    #summary.bad { color: #f85149; border-color: #7a2020; }
+    ol { list-style: none; margin: 0; padding: 0; }
+    li { display: flex; gap: 10px; padding: 2px 0; }
+    .mark { width: 1.2em; flex: none; font-weight: 700; }
+    li.ok .mark { color: #3fb950; }
+    li.bad .mark { color: #f85149; }
+    li.bad { background: rgba(248, 81, 73, 0.08); }
+    .detail { color: #8b93a7; }
+    .group { margin: 18px 0 4px; color: #79a8ff; font-weight: 700; }
+    #fixture-demo { margin-top: 36px; max-width: 900px; }
+    #fixture-demo .md-article { background: #fff; color: #1f2328; padding: 24px; border-radius: 12px; }
+    .note { color: #8b93a7; font-family: ui-sans-serif, system-ui, sans-serif; }
+    @media (prefers-color-scheme: light) {
+      body { background: #f6f7f9; color: #1f2328; }
+      #summary { background: #fff; border-color: #e2e5ea; }
+      li.bad { background: #fff1f0; }
+    }
+  </style>
+</head>
+<body>
+  <h1>MD Reader Pro · 渲染器自检</h1>
+  <p class="sub">
+    加载 <code>dist/renderer.js</code>，在真实浏览器里验证 docs/CONTRACT.md §3 的渲染契约。
+    用 <code>node test/render/check.mjs</code> 自动运行，或直接打开本页查看结果。
+  </p>
+  <div id="summary">运行中…</div>
+  <ol id="results"></ol>
+
+  <section id="fixture-demo" hidden>
+    <h2>fixtures/full.md 渲染预览</h2>
+    <p class="note">下面的内容由渲染器实时生成，用于人工检查排版。</p>
+    <div id="fixture-demo-body"></div>
+  </section>
+
+  <script type="module">
+    import { DEFAULT_RENDER_OPTIONS, createRenderer } from '../../dist/renderer.js';
+
+    const results = [];
+    const auditRoot = document.createElement('div');
+    let currentGroup = '';
+
+    window.__mdResults = results;
+    window.__mdDone = false;
+    window.__mdXssRan = false;
+
+    function group(name) {
+      currentGroup = name;
+      window.__mdProgress = name;
+      // Visible to `node test/render/check.mjs` and useful when a render hangs.
+      console.debug('[md-harness]', name);
+    }
+
+    function check(name, ok, detail = '') {
+      results.push({ name: `${currentGroup} ${name}`.trim(), ok: Boolean(ok), detail: String(detail || '') });
+    }
+
+    function eq(name, actual, expected) {
+      const ok = actual === expected;
+      check(name, ok, ok ? '' : `got ${preview(actual)} · want ${preview(expected)}`);
+    }
+
+    function preview(value) {
+      try {
+        const text = JSON.stringify(value);
+        return text && text.length > 180 ? `${text.slice(0, 180)}…` : text;
+      } catch {
+        return String(value);
+      }
+    }
+
+    function mount(html) {
+      const root = document.createElement('div');
+      root.className = 'md-article';
+      root.innerHTML = html;
+      return root;
+    }
+
+    function count(html, selector) {
+      return mount(html).querySelectorAll(selector).length;
+    }
+
+    function first(html, selector) {
+      return mount(html).querySelector(selector);
+    }
+
+    function texts(root, selector) {
+      return [...root.querySelectorAll(selector)].map((el) => (el.textContent || '').trim());
+    }
+
+    /** Structural security audit on the sanitized DOM (code text not flagged). */
+    function auditSafety(html) {
+      const root = mount(html);
+      const problems = [];
+      const forbidden = root.querySelectorAll('script,iframe,style,object,embed,form,base,meta,link');
+      if (forbidden.length) problems.push(`forbidden elements: ${forbidden.length}`);
+      for (const el of root.querySelectorAll('*')) {
+        for (const attr of el.attributes) {
+          if (/^on/i.test(attr.name)) problems.push(`${el.tagName.toLowerCase()}[${attr.name}]`);
+          if (/^(href|src|action|formaction|xlink:href)$/i.test(attr.name) && /^\s*(?:javascript|vbscript):/i.test(attr.value)) {
+            problems.push(`${el.tagName.toLowerCase()}[${attr.name}=js]`);
+          }
+        }
+      }
+      return problems;
+    }
+
+    function headingDomMatches(result) {
+      const root = mount(result.html);
+      const problems = [];
+      for (const heading of result.headings) {
+        const node = root.querySelector(`#${CSS.escape(heading.id)}`);
+        if (!node) {
+          problems.push(`missing #${heading.id}`);
+          continue;
+        }
+        if (Number(node.tagName.slice(1)) !== heading.level) problems.push(`level ${heading.id}`);
+        if (!node.classList.contains('md-heading')) problems.push(`class ${heading.id}`);
+        const anchor = node.querySelector(':scope > a.md-anchor');
+        if (!anchor) problems.push(`anchor ${heading.id}`);
+        else if (anchor.getAttribute('href') !== `#${heading.id}`) problems.push(`anchor href ${heading.id}`);
+      }
+      return problems;
+    }
+
+    const lines = (...items) => items.join('\n');
+    const fence = (lang, body) => ['```' + lang, ...body, '```'];
+
+    async function run() {
+      /* ---------------------------------------------------- defaults */
+      group('[options]');
+      eq('DEFAULT_RENDER_OPTIONS.html', DEFAULT_RENDER_OPTIONS.html, true);
+      eq('DEFAULT_RENDER_OPTIONS.frontMatter', DEFAULT_RENDER_OPTIONS.frontMatter, 'card');
+      eq('DEFAULT_RENDER_OPTIONS.toc', DEFAULT_RENDER_OPTIONS.toc, true);
+
+      /* ------------------------------------------------ empty / input */
+      group('[empty]');
+      {
+        const renderer = createRenderer();
+        const empty = renderer.render('');
+        eq('html empty', empty.html, '');
+        eq('headings empty', empty.headings.length, 0);
+        eq('title empty', empty.meta.title, '');
+        eq('wordCount zero', empty.meta.wordCount, 0);
+        eq('sourceBytes zero', empty.meta.sourceBytes, 0);
+        eq('source preserved', empty.source, '');
+        eq('warnings empty', empty.meta.warnings.length, 0);
+
+        let threw = null;
+        let nullResult = null;
+        try {
+          nullResult = renderer.render(null);
+          renderer.render(undefined);
+          renderer.render(42);
+          renderer.render('plain', null);
+        } catch (error) {
+          threw = error;
+        }
+        check('render never throws for odd input', !threw, threw?.message);
+        eq('null source stringified', nullResult?.source, '');
+        eq('number rendered', renderer.render(42).source, '42');
+      }
+
+      /* --------------------------------------------------- front matter */
+      group('[frontmatter]');
+      {
+        const doc = lines('---', 'title: 示例标题', 'author: Tester', 'tags: [a, b]', '---', '# 正文', '', 'Body text.');
+        const card = createRenderer().render(doc);
+        eq('card rendered', count(card.html, '.md-frontmatter'), 1);
+        eq('title from frontmatter', card.meta.title, '示例标题');
+        eq('frontmatter parsed', card.meta.frontmatter.author, 'Tester');
+        eq('frontmatter array', Array.isArray(card.meta.frontmatter.tags), true);
+        check('source keeps front matter', card.source.startsWith('---'), card.source.slice(0, 12));
+
+        const hidden = createRenderer({ frontMatter: 'hide' }).render(doc);
+        eq('hide mode no card', count(hidden.html, '.md-frontmatter'), 0);
+        eq('hide keeps title', hidden.meta.title, '示例标题');
+
+        const raw = createRenderer({ frontMatter: 'raw' }).render(doc);
+        eq('raw mode no card', count(raw.html, '.md-frontmatter'), 0);
+        check('raw mode keeps yaml text', /title:\s*示例标题/.test(raw.html), raw.html.slice(0, 120));
+        eq('raw mode title', raw.meta.title, '示例标题');
+
+        const broken = createRenderer().render(lines('---', 'title: [unclosed', '---', 'body'));
+        check('broken yaml warns', broken.meta.warnings.length >= 1, broken.meta.warnings.join(' | '));
+        eq('broken yaml frontmatter', broken.meta.frontmatter, null);
+        check('broken yaml still renders', broken.html.includes('body'), broken.html.slice(0, 80));
+      }
+
+      /* ------------------------------------------------------ headings */
+      group('[headings]');
+      {
+        const renderer = createRenderer();
+        const doc = lines(
+          '# 中文标题',
+          '',
+          '## 带 `代码` 与 :rocket: 的标题',
+          '',
+          '## 重复',
+          '',
+          '## 重复',
+          '',
+          '### 三级标题 {#custom-id .extra}',
+          '',
+          '## location',
+        );
+        const result = renderer.render(doc);
+        eq('heading count', result.headings.length, 6);
+        eq('meta title no anchor', result.meta.title, '中文标题');
+        eq('inline code / emoji text', result.headings[1].text, '带 代码 与 🚀 的标题');
+        check('no anchor text in headings', result.headings.every((h) => !h.text.includes('#')), JSON.stringify(result.headings.map((h) => h.text)));
+        check('no markdown in headings', result.headings.every((h) => !h.text.includes('`')), JSON.stringify(result.headings.map((h) => h.text)));
+        eq('duplicate suffix', result.headings[3].id, '重复-1');
+        check('cjk friendly id', /[\u4e00-\u9fff]/.test(result.headings[0].id), result.headings[0].id);
+        eq('custom id honoured', result.headings[4].id, 'custom-id');
+        eq('unique ids', new Set(result.headings.map((h) => h.id)).size, result.headings.length);
+        eq('custom id class kept', first(result.html, '#custom-id')?.classList.contains('extra'), true);
+        eq('dom headings match', headingDomMatches(result).length, 0);
+        eq('anchor count', count(result.html, '.md-heading > a.md-anchor'), 6);
+        eq('anchor hidden', first(result.html, '.md-anchor')?.getAttribute('aria-hidden'), 'true');
+        eq('clobbering id kept', Boolean(first(result.html, '#location')), true);
+
+        const withAttrs = renderer.render('## 标题 {.center #my-id}');
+        eq('attrs id + class', withAttrs.headings[0].id, 'my-id');
+        eq('attrs class', first(withAttrs.html, '#my-id')?.classList.contains('center'), true);
+      }
+
+      /* --------------------------------------------------- [[toc]] */
+      group('[toc]');
+      {
+        const doc = lines(
+          '# 文档标题',
+          '',
+          '## 目录',
+          '',
+          '[[toc]]',
+          '',
+          '## 第一节',
+          '',
+          '### 小节',
+          '',
+          '## 第二节',
+        );
+        const result = createRenderer().render(doc);
+        const root = mount(result.html);
+        const nav = root.querySelector('.md-toc-inline');
+        check('toc nav rendered', Boolean(nav), result.html.slice(0, 120));
+        const links = nav ? [...nav.querySelectorAll('a')] : [];
+        eq('toc links', links.length, 3);
+        eq('toc skips h1', links.some((a) => a.getAttribute('href') === '#文档标题'), false);
+        eq('toc skips intro heading', links.some((a) => a.getAttribute('href') === '#目录'), false);
+        eq('toc first link', links[0]?.getAttribute('href'), '#第一节');
+        eq('toc nested list', Boolean(nav?.querySelector('ul ul')), true);
+        check('toc text clean', links.every((a) => !a.textContent.includes('#')), links.map((a) => a.textContent).join('|'));
+        eq('toc marker gone', result.html.includes('data-md-toc="1"') && result.html.includes('[[toc]]'), false);
+
+        const off = createRenderer({ toc: false }).render(doc);
+        eq('toc option off renders literal', count(off.html, '.md-toc-inline'), 0);
+        check('toc literal text kept', off.html.includes('[[toc]]'), off.html.slice(0, 120));
+      }
+
+      /* ------------------------------------------------------ tables */
+      group('[tables]');
+      {
+        const doc = lines(
+          '| 左对齐 | 居中 | 右对齐 |',
+          '| :--- | :----: | ----: |',
+          '| a | b | c |',
+          '| `code` | **bold** | [link](https://example.com) |',
+        );
+        const result = createRenderer().render(doc);
+        eq('table wrapped', count(result.html, '.md-table-wrap table'), 1);
+        eq('table inside wrap only', count(result.html, 'table'), 1);
+        const headers = [...mount(result.html).querySelectorAll('th')];
+        eq('three headers', headers.length, 3);
+        eq('left align', headers[0]?.style.textAlign, 'left');
+        eq('center align', headers[1]?.style.textAlign, 'center');
+        eq('right align', headers[2]?.style.textAlign, 'right');
+        eq('inline code in cell', count(result.html, 'td code'), 1);
+        eq('bold in cell', count(result.html, 'td strong'), 1);
+        eq('link in cell', count(result.html, 'td a[href="https://example.com"]'), 1);
+        eq('no colspan without multimd syntax', count(result.html, '[colspan]'), 0);
+
+        const multi = createRenderer().render([
+          '|             |          Grouping           ||',
+          'First Header  | Second Header | Third Header |',
+          ' ------------ | :-----------: | -----------: |',
+          'Content       |          *Long Cell*        ||',
+          'Content       |   **Cell**    |         Cell |',
+        ].join('\n'));
+        check('multimd colspan', count(multi.html, 'th[colspan], td[colspan]') >= 1, multi.html.slice(0, 260));
+
+        const auto = createRenderer().render('Visit https://example.com now.');
+        eq('autolink', count(auto.html, 'a[href="https://example.com"]'), 1);
+        const indented = createRenderer().render('    const a = 1;');
+        eq('indented code wrapped', count(indented.html, '.md-code[data-lang="text"]'), 1);
+        eq('indented code content', first(indented.html, '.md-code code')?.textContent, 'const a = 1;\n');
+      }
+
+      /* --------------------------------------------- code + highlight */
+      group('[code]');
+      {
+        const doc = lines(
+          ...fence('js', ['const answer = 42;', 'console.log("hi");']),
+          '',
+          ...fence('typescript', ['const n: number = 1;']),
+          '',
+          ...fence('python', ['def f():', '    return 1']),
+          '',
+          ...fence('bash', ['npm run build']),
+          '',
+          ...fence('diff', ['- old', '+ new']),
+          '',
+          ...fence('json', ['{"a": 1}']),
+          '',
+          ...fence('unknownlang', ['<script>alert(1)<\/script>', 'onclick="x"']),
+          '',
+          ...fence('', ['plain text']),
+        );
+        const result = createRenderer().render(doc);
+        eq('code block count', count(result.html, '.md-code'), 8);
+        eq('code heads', count(result.html, '.md-code .md-code-head'), 8);
+        eq('copy buttons', count(result.html, '.md-code .md-code-copy[data-md-copy]'), 8);
+        eq('lang labels', count(result.html, '.md-code .md-code-lang'), 8);
+        eq('data-lang js', count(result.html, '.md-code[data-lang="js"]'), 1);
+        eq('data-lang unknown', count(result.html, '.md-code[data-lang="unknownlang"]'), 1);
+        eq('data-lang default text', count(result.html, '.md-code[data-lang="text"]'), 1);
+        eq('language class js', count(result.html, 'code.hljs.language-js'), 1);
+        check('highlighting active', count(result.html, '.hljs-keyword') >= 2, String(count(result.html, '.hljs-keyword')));
+        eq('copy button empty', first(result.html, '.md-code-copy')?.textContent, '');
+        eq('unknown code escaped as text', first(result.html, '.md-code[data-lang="unknownlang"] code')?.textContent, '<script>alert(1)<\/script>\nonclick="x"\n');
+        eq('unknown code has no script element', count(result.html, '.md-code script'), 0);
+        eq('no inline handlers in code', count(result.html, '.md-code [onclick]'), 0);
+        check('code output safe', auditSafety(result.html).length === 0, auditSafety(result.html).join(', '));
+        const root = mount(result.html);
+        const codeTexts = [...root.querySelectorAll('.md-code code')].map((el) => el.textContent);
+        check('json block preserved', codeTexts.some((text) => text.includes('"a": 1')), JSON.stringify(codeTexts));
+        check('diff block highlighted', count(result.html, '.hljs-deletion') + count(result.html, '.hljs-addition') >= 2, String(count(result.html, '.hljs-deletion')));
+      }
+
+      /* -------------------------------------------------- math / KaTeX */
+      group('[math]');
+      {
+        const doc = lines(
+          'Inline $a^2 + b^2 = c^2$ and \\(x + y\\) and \\[z\\] here.',
+          '',
+          '$$',
+          '\\frac{1}{2}',
+          '$$',
+          '',
+          '\\[',
+          '\\int_0^1 x\\,dx',
+          '\\]',
+          '',
+          'Bad math: $\\href{javascript:alert(1)}{click}$',
+        );
+        const result = createRenderer().render(doc);
+        check('katex rendered inline', count(result.html, '.katex') >= 4, String(count(result.html, '.katex')));
+        check('mathml preserved', count(result.html, 'math') >= 3, String(count(result.html, 'math')));
+        check('mathml rows preserved', count(result.html, 'math mrow') >= 1, String(count(result.html, 'math mrow')));
+        check('mathml identifiers preserved', count(result.html, 'math mi') >= 1, String(count(result.html, 'math mi')));
+        eq('katex trust false: no js url', [...mount(result.html).querySelectorAll('a[href]')].filter((a) => /^javascript:/i.test(a.getAttribute('href'))).length, 0);
+        check('math output safe', auditSafety(result.html).length === 0, auditSafety(result.html).join(', '));
+        eq('hasMath true', result.meta.hasMath, true);
+        const noMath = createRenderer({ math: false }).render('Inline $x$ here.');
+        eq('math disabled', count(noMath.html, '.katex'), 0);
+        eq('hasMath false', noMath.meta.hasMath, false);
+      }
+
+      /* ------------------------------------------------------- figures */
+      group('[images]');
+      {
+        const doc = lines(
+          '![A caption](a.png)',
+          '',
+          'Text with ![inline alt](b.png) inside.',
+          '',
+          '![](no-alt.png)',
+          '',
+          '[![Linked](c.png)](https://example.com)',
+        );
+        const result = createRenderer().render(doc);
+        eq('figure count', count(result.html, 'figure.md-figure'), 2);
+        eq('figcaption text', first(result.html, 'figure.md-figure figcaption')?.textContent, 'A caption');
+        eq('figure image alt', first(result.html, 'figure.md-figure img')?.getAttribute('alt'), 'A caption');
+        const inlineRoot = mount(result.html);
+        const inlineP = [...inlineRoot.querySelectorAll('p')].find((p) => p.textContent.includes('Text with'));
+        eq('inline image stays in paragraph', Boolean(inlineP?.querySelector('img[alt="inline alt"]')), true);
+        eq('inline image not a figure', Boolean(inlineP?.querySelector('figure')), false);
+        eq('no-alt image bare', count(result.html, 'p img[src="no-alt.png"]'), 1);
+        eq('linked figure', count(result.html, 'figure.md-figure a[href="https://example.com"] img'), 1);
+
+        const dataSvg = createRenderer().render('![svg](data:image/svg+xml,%3Csvg%3E%3C/svg%3E)');
+        eq('svg data-uri image kept', count(dataSvg.html, 'figure.md-figure img[src^="data:image/svg+xml"]'), 1);
+        const badData = createRenderer().render('[x](data:text/html,<b>hi</b>)');
+        eq('data:text/html link dropped', [...mount(badData.html).querySelectorAll('a[href]')].filter((a) => /^data:/i.test(a.getAttribute('href'))).length, 0);
+      }
+
+      /* ---------------------------------------------- links + baseUrl */
+      group('[links]');
+      {
+        const doc = lines(
+          '[relative](other.md) [anchor](#中文标题) [external](https://example.com/x) [mail](mailto:a@b.c)',
+          '',
+          '![img](pics/a.png)',
+          '',
+          '[proto](//cdn.example.com/a)',
+        );
+        const result = createRenderer().render(doc, { baseUrl: 'https://example.com/docs/readme.md' });
+        const root = mount(result.html);
+        eq('relative link resolved', Boolean(root.querySelector('a[href="https://example.com/docs/other.md"]')), true);
+        eq('anchor untouched', Boolean(root.querySelector('a[href="#中文标题"]')), true);
+        eq('external untouched', Boolean(root.querySelector('a[href="https://example.com/x"]')), true);
+        eq('mailto untouched', Boolean(root.querySelector('a[href="mailto:a@b.c"]')), true);
+        eq('protocol relative resolved', Boolean(root.querySelector('a[href="https://cdn.example.com/a"]')), true);
+        eq('image resolved', Boolean(root.querySelector('img[src="https://example.com/docs/pics/a.png"]')), true);
+        const external = root.querySelector('a[href="https://example.com/x"]');
+        check('rel on external link', (external?.getAttribute('rel') || '').includes('noopener'), external?.getAttribute('rel'));
+        const absoluteLinks = [...root.querySelectorAll('a[href]')].filter((a) => !a.getAttribute('href').startsWith('#'));
+        check('rel on all links', absoluteLinks.every((a) => (a.getAttribute('rel') || '').includes('noopener')), absoluteLinks.map((a) => a.getAttribute('rel')).join('|'));
+      }
+
+      /* ------------------------------------------- alerts + containers */
+      group('[alerts]');
+      {
+        const doc = lines(
+          '::: tip 小提示',
+          '内容 **bold**',
+          ':::',
+          '',
+          '::: warning',
+          '注意',
+          ':::',
+          '',
+          '::: danger 危险操作',
+          '危险',
+          ':::',
+          '',
+          '> [!NOTE]',
+          '> note body',
+          '',
+          '> [!TIP]',
+          '> tip body',
+          '',
+          '> [!IMPORTANT]',
+          '> important body',
+          '',
+          '> [!WARNING]',
+          '> warning body',
+          '',
+          '> [!CAUTION]',
+          '> caution body',
+        );
+        const result = createRenderer().render(doc);
+        eq('containers', count(result.html, '.md-container'), 3);
+        eq('container tip class', count(result.html, '.md-container.md-alert.md-alert-tip'), 1);
+        eq('container warning class', count(result.html, '.md-container.md-alert.md-alert-warning'), 1);
+        eq('container danger -> caution', count(result.html, '.md-container.md-alert.md-alert-caution'), 1);
+        eq('container custom title', first(result.html, '.md-alert-tip .md-alert-title')?.textContent, '小提示');
+        eq('container default title', first(result.html, '.md-alert-warning .md-alert-title')?.textContent, 'WARNING');
+        eq('container markdown inside', count(result.html, '.md-container strong'), 1);
+        eq('github alerts', count(result.html, '.md-alert.md-alert-note, .md-alert.md-alert-tip, .md-alert.md-alert-important, .md-alert.md-alert-warning, .md-alert.md-alert-caution'), 8);
+        const titles = [...mount(result.html).querySelectorAll('.md-alert-title')].map((el) => el.textContent.trim());
+        check('alert titles', ['NOTE', 'TIP', 'IMPORTANT', 'WARNING', 'CAUTION'].every((title) => titles.includes(title)), titles.join('|'));
+        eq('alert body', count(result.html, '.md-alert:not(.md-container) > p:not(.md-alert-title)'), 5);
+        check('all alerts safe', auditSafety(result.html).length === 0, auditSafety(result.html).join(', '));
+      }
+
+      /* ------------------------------------------------ gfm extensions */
+      group('[gfm]');
+      {
+        const doc = lines(
+          '- [x] done',
+          '- [ ] todo',
+          '',
+          'Term',
+          ': Definition text.',
+          '',
+          '*[HTML]: HyperText Markup Language',
+          '',
+          'HTML, H~2~O, E = mc^2^, ==mark==, ++ins++, :rocket:',
+        );
+        const result = createRenderer().render(doc);
+        eq('task list container', count(result.html, 'ul.contains-task-list'), 1);
+        eq('task items', count(result.html, '.task-list-item'), 2);
+        eq('checked count', count(result.html, '.task-list-item-checkbox:checked'), 1);
+        eq('checkbox disabled', first(result.html, '.task-list-item-checkbox')?.hasAttribute('disabled'), true);
+        eq('deflist', count(result.html, 'dl dt'), 1);
+        eq('deflist dd', count(result.html, 'dl dd'), 1);
+        eq('abbr', first(result.html, 'abbr[title="HyperText Markup Language"]')?.textContent, 'HTML');
+        eq('sub', count(result.html, 'sub'), 1);
+        eq('sup', count(result.html, 'sup'), 1);
+        eq('mark', count(result.html, 'mark'), 1);
+        eq('ins', count(result.html, 'ins'), 1);
+        check('emoji shortcode', result.html.includes('🚀'), result.html.slice(-200));
+      }
+
+      /* ------------------------------------------------------- footnotes */
+      group('[footnotes]');
+      {
+        const doc = lines(
+          'One[^1] and two[^2].',
+          '',
+          '[^1]: First note with **bold**.',
+          '[^2]: Second note.',
+        );
+        const result = createRenderer().render(doc);
+        eq('footnotes wrapper', count(result.html, '.md-footnotes'), 1);
+        eq('footnote section', count(result.html, '.md-footnotes section.footnotes'), 1);
+        eq('footnote refs', count(result.html, '.footnote-ref'), 2);
+        eq('footnote backrefs', count(result.html, '.footnote-backref'), 2);
+        const backref = first(result.html, '.footnote-backref');
+        check('backref href', (backref?.getAttribute('href') || '').includes('fnref'), backref?.getAttribute('href'));
+        eq('footnote bold', count(result.html, '.md-footnotes strong'), 1);
+      }
+
+      /* ---------------------------------------------------- raw HTML */
+      group('[rawhtml]');
+      {
+        const doc = lines(
+          '<details>',
+          '<summary>safe details</summary>',
+          'Benign HTML should survive.',
+          '</details>',
+          '',
+          '<kbd>Ctrl</kbd> + <kbd>K</kbd>',
+          '',
+          '<div class="note" id="raw-note">raw div</div>',
+        );
+        const result = createRenderer().render(doc);
+        eq('details kept', count(result.html, 'details'), 1);
+        eq('summary kept', count(result.html, 'summary'), 1);
+        eq('kbd kept', count(result.html, 'kbd'), 2);
+        eq('raw class kept', first(result.html, '#raw-note')?.className, 'note');
+        eq('hasCode false', result.meta.hasCode, false);
+      }
+
+      /* --------------------------------------------------------- xss */
+      group('[security]');
+      {
+        const doc = lines(
+          '# Security test',
+          '',
+          '<script>window.__mdXssRan = true;<\/script>',
+          '',
+          '<img src="x" onerror="window.__mdXssRan = true;">',
+          '',
+          '<a href="javascript:window.__mdXssRan=true">click me</a>',
+          '',
+          '<iframe src="https://example.com"></iframe>',
+          '',
+          '<div onclick="window.__mdXssRan=true">safe details</div>',
+          '',
+          '<details><summary>safe details</summary>This benign HTML should survive.</details>',
+          '',
+          '<style>body { display: none !important; }</style>',
+          '',
+          '<svg onload="window.__mdXssRan=true"><circle r="10"></circle></svg>',
+          '',
+          'Normal **Markdown** still renders.',
+        );
+        const result = createRenderer().render(doc);
+        const problems = auditSafety(result.html);
+        eq('no forbidden elements or handlers', problems.length, 0);
+        eq('scripts stripped', count(result.html, 'script'), 0);
+        eq('iframes stripped', count(result.html, 'iframe'), 0);
+        eq('style stripped', count(result.html, 'style'), 0);
+        eq('javascript hrefs stripped', [...mount(result.html).querySelectorAll('a[href]')].filter((a) => /^javascript:/i.test(a.getAttribute('href'))).length, 0);
+        eq('benign details kept', count(result.html, 'details'), 1);
+        check('benign text kept', mount(result.html).textContent.includes('safe details'), mount(result.html).textContent.slice(0, 100));
+        eq('markdown still renders', count(result.html, 'p strong'), 1);
+
+        const live = document.createElement('div');
+        live.innerHTML = result.html;
+        document.body.append(live);
+        await new Promise((resolve) => setTimeout(resolve, 250));
+        eq('payload never executed', window.__mdXssRan, false);
+        live.remove();
+      }
+
+      /* ------------------------------------------------ malformed input */
+      group('[malformed]');
+      {
+        const doc = [
+          '# Unclosed **bold',
+          '',
+          '> quote',
+          '> > nested quote',
+          '',
+          '- list item',
+          '  ```js',
+          '  const a = 1;',
+          '',
+          '[link](',
+          '',
+          '| broken | table',
+          '',
+          '::: tip',
+          'no closing fence',
+          '',
+          '<div class="x">',
+          '',
+          'Tail text.',
+        ].join('\n');
+        let renderer = null;
+        let result = null;
+        try {
+          renderer = createRenderer();
+          result = renderer.render(doc);
+        } catch (error) {
+          check('malformed never throws', false, error.message);
+        }
+        check('malformed never throws', Boolean(result), '');
+        eq('nested blockquote', count(result.html, 'blockquote blockquote'), 1);
+        check('malformed output safe', auditSafety(result.html).length === 0, auditSafety(result.html).join(', '));
+        check('malformed returns html', typeof result.html === 'string' && result.html.length > 0, '');
+      }
+
+      /* ------------------------------------------------------ meta flags */
+      group('[meta]');
+      {
+        const doc = lines(
+          '# Title',
+          '',
+          'Text $x$ and:',
+          '',
+          ...fence('js', ['const a = 1;']),
+          '',
+          '```mermaid',
+          'flowchart LR',
+          '  A --> B',
+          '```',
+        );
+        const result = createRenderer().render(doc);
+        eq('hasMath', result.meta.hasMath, true);
+        eq('hasCode', result.meta.hasCode, true);
+        eq('hasMermaid', result.meta.hasMermaid, true);
+        eq('title fallback', createRenderer().render('just text', { titleFallback: 'Fallback' }).meta.title, 'Fallback');
+        eq('cjk word count', createRenderer().render('你好 world').meta.wordCount, 3);
+        check('reading minutes', createRenderer().render('你好 world').meta.readingMinutes >= 1, '');
+        eq('sourceBytes utf8', createRenderer().render('你好').meta.sourceBytes, 6);
+      }
+
+      /* ------------------------------------------------------- options */
+      group('[render-options]');
+      {
+        const renderer = createRenderer({
+          math: false,
+          mermaid: false,
+          highlight: false,
+          emoji: false,
+          toc: false,
+          frontMatter: 'hide',
+        });
+        const doc = lines(
+          '---',
+          'title: T',
+          '---',
+          '# H',
+          '',
+          '$x$ and :rocket:',
+          '',
+          '```mermaid',
+          'flowchart LR',
+          '  A --> B',
+          '```',
+          '',
+          '```js',
+          'const a = 1;',
+          '```',
+          '',
+          '[[toc]]',
+        );
+        const result = renderer.render(doc);
+        eq('math off', count(result.html, '.katex'), 0);
+        eq('mermaid off -> code', count(result.html, '.md-mermaid'), 0);
+        eq('mermaid off code block', count(result.html, '.md-code[data-lang="mermaid"]'), 1);
+        eq('highlight off', count(result.html, '.hljs-keyword'), 0);
+        check('emoji off', result.html.includes(':rocket:'), result.html.slice(-200));
+        check('toc off literal', result.html.includes('[[toc]]'), '');
+        eq('frontmatter hide', count(result.html, '.md-frontmatter'), 0);
+        eq('options exposed', renderer.options.math, false);
+      }
+
+      /* -------------------------------------------------------- mermaid */
+      group('[mermaid]');
+      {
+        const doc = lines(
+          ...fence('mermaid', ['flowchart LR', '  A[Start] --> B{OK?}', '  B --> C[Done]']),
+          '',
+          ...fence('mermaid', ['sequenceDiagram', '  Alice->>Bob: Hello']),
+          '',
+          ...fence('mermaid', ['this is not a valid diagram']),
+        );
+        const renderer = createRenderer();
+        const result = renderer.render(doc);
+        eq('mermaid placeholders', count(result.html, '.md-mermaid'), 3);
+        eq('mermaid body placeholder', count(result.html, '.md-mermaid .md-mermaid-body'), 3);
+        eq('mermaid src kept', count(result.html, '.md-mermaid .md-mermaid-src'), 3);
+        eq('mermaid error hidden initially', count(result.html, '.md-mermaid-error[hidden]'), 3);
+        eq('mermaid theme attr', first(result.html, '.md-mermaid')?.getAttribute('data-theme'), 'light');
+        eq('mermaid not rendered yet', count(result.html, '[data-md-rendered]'), 0);
+
+        const root = mount(result.html);
+        root.style.cssText = 'position:fixed;left:-10000px;top:0;width:900px;';
+        document.body.append(root);
+
+        let enhanceError = null;
+        let firstRun = null;
+        try {
+          firstRun = await renderer.enhance(root, { theme: 'light' });
+        } catch (error) {
+          enhanceError = error;
+        }
+        check('enhance never throws', !enhanceError, enhanceError?.message);
+        eq('enhance returns mermaidErrors', typeof firstRun?.mermaidErrors, 'number');
+        check('invalid diagram reports error', firstRun.mermaidErrors >= 1, String(firstRun?.mermaidErrors));
+        eq('valid diagrams rendered', count(root.outerHTML, '.md-mermaid[data-md-rendered="1"]'), 2);
+        eq('svg produced', count(root.outerHTML, '.md-mermaid .md-mermaid-body svg'), 2);
+        eq('error marked', count(root.outerHTML, '.md-mermaid[data-md-error="1"]'), 1);
+        const errorBox = [...root.querySelectorAll('.md-mermaid-error')].find((box) => !box.hidden);
+        check('error card visible', Boolean(errorBox), '');
+        check('error card shows message + source', Boolean(errorBox && /not a valid diagram/.test(errorBox.textContent) && /失败/.test(errorBox.textContent)), errorBox?.textContent?.slice(0, 120));
+        eq('rendered theme', [...root.querySelectorAll('.md-mermaid[data-md-rendered="1"]')].every((block) => block.dataset.theme === 'light'), true);
+
+        const secondRun = await renderer.enhance(root, { theme: 'light' });
+        eq('enhance idempotent svg count', count(root.outerHTML, '.md-mermaid .md-mermaid-body svg'), 2);
+        eq('enhance idempotent errors', secondRun.mermaidErrors, firstRun.mermaidErrors);
+        eq('no duplicate svg nesting', count(root.outerHTML, '.md-mermaid-body svg svg'), 0);
+
+        const darkRun = await renderer.enhance(root, { theme: 'dark' });
+        check('theme change keeps errors', darkRun.mermaidErrors >= 1, String(darkRun.mermaidErrors));
+        eq('theme change re-renders', count(root.outerHTML, '.md-mermaid[data-md-rendered="1"]'), 2);
+        eq('theme attr dark', [...root.querySelectorAll('.md-mermaid[data-md-rendered="1"]')].every((block) => block.dataset.theme === 'dark'), true);
+        eq('svg after theme change', count(root.outerHTML, '.md-mermaid .md-mermaid-body svg'), 2);
+        root.remove();
+
+        const noMermaid = document.createElement('div');
+        noMermaid.innerHTML = '<p>no diagrams</p>';
+        let plain = null;
+        let plainError = null;
+        try {
+          plain = await renderer.enhance(noMermaid);
+          await renderer.enhance(null);
+        } catch (error) {
+          plainError = error;
+        }
+        check('enhance without mermaid never throws', !plainError, plainError?.message);
+        eq('enhance without mermaid returns 0', plain?.mermaidErrors, 0);
+
+        const disabled = createRenderer({ mermaid: false });
+        const disabledResult = disabled.render(lines(...fence('mermaid', ['flowchart LR', '  A --> B'])));
+        eq('mermaid option disables placeholder', count(disabledResult.html, '.md-mermaid'), 0);
+        eq('mermaid option disabled enhance', (await disabled.enhance(mount(disabledResult.html))).mermaidErrors, 0);
+      }
+
+      /* --------------------------------------------------- large input */
+      group('[large]');
+      {
+        const big = 'a'.repeat(4 * 1024 * 1024 + 4096);
+        let result = null;
+        let error = null;
+        try {
+          result = createRenderer().render(big);
+        } catch (thrown) {
+          error = thrown;
+        }
+        check('large doc never throws', !error, error?.message);
+        check('large doc warns', (result?.meta.warnings?.length || 0) >= 1, JSON.stringify(result?.meta?.warnings));
+        check('large doc sourceBytes', (result?.meta?.sourceBytes || 0) > 4 * 1024 * 1024, String(result?.meta?.sourceBytes));
+        check('large doc still renders', (result?.html?.length || 0) > 0, String(result?.html?.length));
+      }
+
+      /* ------------------------------------------------- full fixture */
+      group('[fixture]');
+      {
+        let fixtureResult = null;
+        let fixtureError = null;
+        try {
+          const response = await fetch('./fixtures/full.md', { cache: 'no-store' });
+          const markdown = await response.text();
+          fixtureResult = createRenderer().render(markdown, { baseUrl: 'https://example.com/docs/full.md' });
+        } catch (error) {
+          fixtureError = error;
+        }
+        check('fixture renders', Boolean(fixtureResult) && !fixtureError, fixtureError?.message);
+        if (fixtureResult) {
+          const html = fixtureResult.html;
+          eq('fixture frontmatter', count(html, '.md-frontmatter'), 1);
+          eq('fixture toc', count(html, '.md-toc-inline'), 1);
+          check('fixture tables', count(html, '.md-table-wrap table') >= 1, String(count(html, '.md-table-wrap table')));
+          check('fixture code', count(html, '.md-code') >= 6, String(count(html, '.md-code')));
+          check('fixture katex', count(html, '.katex') >= 3, String(count(html, '.katex')));
+          eq('fixture alerts', count(html, '.md-alert'), 8);
+          eq('fixture containers', count(html, '.md-container'), 3);
+          eq('fixture footnotes', count(html, '.md-footnotes'), 1);
+          check('fixture figures', count(html, 'figure.md-figure') >= 1, String(count(html, 'figure.md-figure')));
+          check('fixture headings match DOM', headingDomMatches(fixtureResult).length === 0, headingDomMatches(fixtureResult).join(', '));
+          check('fixture output safe', auditSafety(html).length === 0, auditSafety(html).join(', '));
+          const demo = document.getElementById('fixture-demo');
+          const body = document.getElementById('fixture-demo-body');
+          if (demo && body) {
+            demo.hidden = false;
+            body.innerHTML = html;
+          }
+        }
+      }
+    }
+
+    /* ----------------------------------------------------------- runner */
+    const summary = document.getElementById('summary');
+    const list = document.getElementById('results');
+
+    // Fire and forget: keep module evaluation fast so the page reaches
+    // DOMContentLoaded while the checks keep running in the background.
+    void (async () => {
+      try {
+        await run();
+      } catch (error) {
+        check('harness completed', false, error?.stack || error?.message || String(error));
+      }
+      finalize();
+    })();
+
+    function finalize() {
+    const failed = results.filter((item) => !item.ok);
+    summary.textContent = `${results.length - failed.length}/${results.length} checks passed${
+      failed.length ? ` · ${failed.length} failed` : ' · all good'
+    }`;
+    summary.className = failed.length ? 'bad' : 'ok';
+    list.innerHTML = results
+      .map((item) => {
+        const mark = item.ok ? '✓' : '✗';
+        const detail = item.ok || !item.detail ? '' : ` <span class="detail">— ${escapeHtml(item.detail)}</span>`;
+        return `<li class="${item.ok ? 'ok' : 'bad'}"><span class="mark">${mark}</span><span>${escapeHtml(item.name)}${detail}</span></li>`;
+      })
+      .join('');
+    window.__mdDone = true;
+    window.__mdFailed = failed.length;
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+    }
+  </script>
+</body>
+</html>

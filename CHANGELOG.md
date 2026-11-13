@@ -1,0 +1,25 @@
+# Changelog
+
+All notable changes to **MD Reader Pro** are documented here.
+
+## [1.0.0] — 2026-11-13
+
+### Added
+
+- Chrome / Edge Manifest V3 extension that renders Markdown links, local `.md` files and Markdown-looking plain-text pages.
+- Full rendering pipeline: CommonMark + GFM, tables, task lists, footnotes, definition lists, abbreviations, sub/sup, insert/mark, emoji, attributes, containers, GitHub Alerts, multi-line tables, YAML front matter, `[[toc]]`.
+- KaTeX math (`$...$`, `$$...$$`, `\(...\)`, `\[...\]`), lazy-loaded Mermaid diagrams and highlight.js code highlighting.
+- Reading UI: fixed toolbar and table of contents, independent content scrolling, TOC scroll-spy, reading progress, raw source view, copy Markdown, code copy, image lightbox, print styles.
+- Four themes (light / dark / sepia / system), adjustable font size, line height, reading width, serif/sans font, custom CSS.
+- Font zoom percentage between the − / + toolbar buttons; click the percentage to reset to 100%.
+- Standalone viewer with drag & drop, file picker, paste, sample document and `?url=` support.
+- Popup, options page, import/export/reset settings, live reload for remote documents.
+- Security: DOMPurify sanitisation, strict Mermaid security, no remote code, no telemetry.
+- Automated checks: 91 end-to-end checks (real Chrome with unpacked extension) and 212 renderer checks.
+
+### Changed
+
+- Removed the reader footer (source URL / renderer credit) for a cleaner document ending.
+- Tables now use a light solid grid.
+
+[1.0.0]: https://github.com/Hanice404/md-reader-pro/releases/tag/v1.0.0

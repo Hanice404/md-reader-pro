@@ -1,0 +1,8 @@
+{
+  "extName": { "message": "MD Reader Pro" },
+  "extDesc": { "message": "快速、优雅、完全离线的 Chrome Markdown 阅读器。支持 CommonMark/GFM、数学公式、图表、目录与多主题。" },
+  "actionTitle": { "message": "MD Reader Pro — 在浏览器中阅读 Markdown" },
+  "cmdToggle": { "message": "以 Markdown 方式阅读当前页面" },
+  "contextMenuRead": { "message": "以 Markdown 阅读" },
+  "fileAccessHint": { "message": "请在扩展详情页开启「允许访问文件网址」后重试。" }
+}

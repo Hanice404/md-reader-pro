@@ -1,0 +1,6 @@
+# MIME typed Markdown
+
+Served as text/markdown from a `.txt` URL.
+
+- one
+- two

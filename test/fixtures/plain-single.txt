@@ -1,0 +1,3 @@
+Just a plain text file with one list.
+
+- only one markdown signal

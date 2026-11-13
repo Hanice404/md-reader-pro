@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="zh-CN" data-md-reader="surface" data-md-theme="auto">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>MD Reader Pro · 设置</title>
+    <link rel="stylesheet" href="./reader.css" />
+  </head>
+  <body class="md-options-body">
+    <div class="md-options-page">
+      <header class="md-options-header">
+        <div class="md-options-brand">
+          <span class="md-logo-mark md-logo-small" aria-hidden="true">M<span>↓</span></span>
+          <div class="md-brand-text">
+            <div class="md-brand-name">MD Reader <b>Pro</b></div>
+            <div class="md-brand-sub" data-i18n="optionsBrandSub">阅读体验设置</div>
+          </div>
+        </div>
+        <div class="md-options-header-actions">
+          <button type="button" class="md-quiet-btn" id="md-export">
+            <span class="md-options-btn-icon" id="md-export-icon" aria-hidden="true"></span>
+            <span data-i18n="exportSettings">导出</span>
+          </button>
+          <button type="button" class="md-quiet-btn" id="md-import">
+            <span class="md-options-btn-icon" id="md-import-icon" aria-hidden="true"></span>
+            <span data-i18n="importSettings">导入</span>
+          </button>
+          <button type="button" class="md-quiet-btn" id="md-reset">
+            <span class="md-options-btn-icon" id="md-reset-icon" aria-hidden="true"></span>
+            <span data-i18n="resetSettings">恢复默认</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="md-options-main">
+        <section class="md-options-hero">
+          <p class="md-options-eyebrow" data-i18n="optionsEyebrow">偏好设置</p>
+          <h1 data-i18n-html="optionsHeadline">让每一篇 Markdown<br />都值得读下去</h1>
+          <p data-i18n="optionsIntro">
+            所有设置即时生效，并同步到已打开的阅读页面。数据只保存在当前浏览器的本地存储中，不会上传。
+          </p>
+        </section>
+
+        <div class="md-options-layout">
+          <div class="md-options-column">
+            <!-- ------------------------------------------------ appearance -->
+            <section class="md-card" aria-labelledby="opt-appearance">
+              <div class="md-card-head">
+                <span class="md-card-icon" data-icon="palette" aria-hidden="true"></span>
+                <div class="md-card-heading">
+                  <h2 id="opt-appearance" data-i18n="sectionAppearance">外观</h2>
+                  <p data-i18n="sectionAppearanceDesc">主题、字号、行高与阅读宽度</p>
+                </div>
+              </div>
+              <div class="md-card-body">
+                <div class="md-field md-field-block">
+                  <div class="md-field-label">
+                    <span data-i18n="readingTheme">阅读主题</span>
+                    <small data-i18n="readingThemeDesc">跟随系统会根据系统深浅色自动切换</small>
+                  </div>
+                  <div class="md-theme-tiles" role="group" aria-label="阅读主题">
+                    <button
+                      type="button"
+                      class="md-theme-tile"
+                      data-setting="theme"
+                      data-value="light"
+                      aria-pressed="false"
+                    >
+                      <span class="md-theme-tile-art" data-art="light" aria-hidden="true"></span>
+                      <span data-i18n="themeLight">浅色</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="md-theme-tile"
+                      data-setting="theme"
+                      data-value="dark"
+                      aria-pressed="false"
+                    >
+                      <span class="md-theme-tile-art" data-art="dark" aria-hidden="true"></span>
+                      <span data-i18n="themeDark">深色</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="md-theme-tile"
+                      data-setting="theme"
+                      data-value="sepia"
+                      aria-pressed="false"
+                    >
+                      <span class="md-theme-tile-art" data-art="sepia" aria-hidden="true"></span>
+                      <span data-i18n="themeSepia">护眼</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="md-theme-tile"
+                      data-setting="theme"
+                      data-value="auto"
+                      aria-pressed="false"
+                    >
+                      <span class="md-theme-tile-art" data-art="auto" aria-hidden="true"></span>
+                      <span data-i18n="themeAuto">跟随系统</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="md-field">
+                  <div class="md-field-label">
+                    <span data-i18n="fontSize">正文字号</span>
+                    <small><output id="out-fontSize">16</output> px</small>
+                  </div>
+                  <div class="md-field-control md-range-ends">
+                    <span class="md-range-end">13</span>
+                    <input
+                      class="md-range"
+                      type="range"
+                      min="13"
+                      max="22"
+                      step="1"
+                      data-setting="fontSize"
+                      aria-label="正文字号"
+                    />
+                    <span class="md-range-end">22</span>
+                  </div>
+                </div>
+
+                <div class="md-field">
+                  <div class="md-field-label">
+                    <span data-i18n="lineHeight">行高</span>
+                    <small><output id="out-lineHeight">1.75</output></small>
+                  </div>
+                  <div class="md-field-control md-range-ends">
+                    <span class="md-range-end">1.4</span>
+                    <input
+                      class="md-range"
+                      type="range"
+                      min="1.4"
+                      max="2.2"
+                      step="0.05"
+                      data-setting="lineHeight"
+                      aria-label="行高"
+                    />
+                    <span class="md-range-end">2.2</span>
+                  </div>
+                </div>
+
+                <div class="md-field">
+                  <div class="md-field-label">
+                    <span data-i18n="contentWidthLabel">阅读宽度</span>
+                    <small data-i18n="contentWidthDesc">宽屏适合代码与表格较多的文档</small>
+                  </div>
+                  <div class="md-field-control">
+                    <div class="md-segmented" role="group" aria-label="阅读宽度">
+                      <button type="button" data-setting="contentWidth" data-value="normal" data-i18n="widthNormalShort">标准</button>
+                      <button type="button" data-setting="contentWidth" data-value="wide" data-i18n="widthWideShort">宽屏</button>
+                      <button type="button" data-setting="contentWidth" data-value="full" data-i18n="widthFullShort">全宽</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="md-field">
+                  <div class="md-field-label">
+                    <span data-i18n="fontFamily">正文字体</span>
+                    <small data-i18n="fontFamilyDesc">衬线字体更适合长文阅读</small>
+                  </div>
+                  <div class="md-field-control">
+                    <div class="md-segmented" role="group" aria-label="正文字体">
+                      <button type="button" data-setting="fontFamily" data-value="sans" data-i18n="fontSans">无衬线</button>
+                      <button type="button" data-setting="fontFamily" data-value="serif" data-i18n="fontSerif">衬线</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- ------------------------------------------------ reading -->
+            <section class="md-card" aria-labelledby="opt-reading">
+              <div class="md-card-head">
+                <span class="md-card-icon" data-icon="book" aria-hidden="true"></span>
+                <div class="md-card-heading">
+                  <h2 id="opt-reading" data-i18n="sectionReading">阅读</h2>
+                  <p data-i18n="sectionReadingDesc">目录、进度条与代码展示</p>
+                </div>
+              </div>
+              <div class="md-card-body">
+                <label class="md-switch-row">
+                  <span class="md-switch-text">
+                    <b data-i18n="showToc">目录侧栏</b>
+                    <small data-i18n="showTocDesc">根据小标题自动生成，滚动时高亮当前章节</small>
+                  </span>
+                  <input type="checkbox" class="md-switch" data-setting="showToc" />
+                </label>
+                <label class="md-switch-row">
+                  <span class="md-switch-text">
+                    <b data-i18n="readingProgress">阅读进度</b>
+                    <small data-i18n="readingProgressDesc">在页面顶部显示阅读位置</small>
+                  </span>
+                  <input type="checkbox" class="md-switch" data-setting="readingProgress" />
+                </label>
+                <label class="md-switch-row">
+                  <span class="md-switch-text">
+                    <b data-i18n="codeLineNumbers">代码行号</b>
+                    <small data-i18n="codeLineNumbersDesc">为代码块添加行号</small>
+                  </span>
+                  <input type="checkbox" class="md-switch" data-setting="codeLineNumbers" />
+                </label>
+                <label class="md-switch-row">
+                  <span class="md-switch-text">
+                    <b data-i18n="codeWrap">代码自动换行</b>
+                    <small data-i18n="codeWrapDesc">关闭时通过横向滚动查看长行</small>
+                  </span>
+                  <input type="checkbox" class="md-switch" data-setting="codeWrap" />
+                </label>
+                <label class="md-switch-row">
+                  <span class="md-switch-text">
+                    <b data-i18n="zoomImages">图片灯箱</b>
+                    <small data-i18n="zoomImagesDesc">点击图片放大查看，支持方向键切换</small>
+                  </span>
+                  <input type="checkbox" class="md-switch" data-setting="zoomImages" />
+                </label>
+                <label class="md-switch-row">
+                  <span class="md-switch-text">
+                    <b data-i18n="externalLinksNewTab">外部链接新标签页打开</b>
+                    <small data-i18n="externalLinksNewTabDesc">站外链接不影响当前阅读进度</small>
+                  </span>
+                  <input type="checkbox" class="md-switch" data-setting="externalLinksNewTab" />
+                </label>
+              </div>
+            </section>
+
+            <!-- ------------------------------------------------ rendering -->
+            <section class="md-card" aria-labelledby="opt-render">
+              <div class="md-card-head">
+                <span class="md-card-icon" data-icon="sparkles" aria-hidden="true"></span>
+                <div class="md-card-heading">
+                  <h2 id="opt-render" data-i18n="sectionRendering">渲染</h2>
+                  <p data-i18n="sectionRenderingDesc">Markdown 扩展语法与富内容</p>
+                </div>
+              </div>
+              <div class="md-card-body">
+                <label class="md-switch-row">
+                  <span class="md-switch-text">
+                    <b data-i18n="math">数学公式（KaTeX）</b>
+                    <small data-i18n="mathDesc">支持 $...$ 与 $$...$$</small>
+                  </span>
+                  <input type="checkbox" class="md-switch" data-setting="math" />
+                </label>
+                <label class="md-switch-row">
+                  <span class="md-switch-text">
+                    <b data-i18n="mermaid">Mermaid 图表</b>
+                    <small data-i18n="mermaidDesc">流程图、时序图、甘特图等，按需加载</small>
+                  </span>
+                  <input type="checkbox" class="md-switch" data-setting="mermaid" />
+                </label>
+                <label class="md-switch-row">
+                  <span class="md-switch-text">
+                    <b data-i18n="rawHtml">允许原始 HTML</b>
+                    <small data-i18n="rawHtmlDesc">渲染前会经过严格清洗，移除脚本与事件属性</small>
+                  </span>
+                  <input type="checkbox" class="md-switch" data-setting="rawHtml" />
+                </label>
+                <label class="md-switch-row">
+                  <span class="md-switch-text">
+                    <b data-i18n="emoji">Emoji 短代码</b>
+                    <small data-i18n="emojiDesc">例如 :smile: 会显示为 😄</small>
+                  </span>
+                  <input type="checkbox" class="md-switch" data-setting="emoji" />
+                </label>
+
+                <div class="md-field">
+                  <div class="md-field-label">
+                    <span data-i18n="frontMatter">Front matter</span>
+                    <small data-i18n="frontMatterDesc">YAML 头部元数据（--- 包裹）</small>
+                  </div>
+                  <div class="md-field-control">
+                    <select class="md-select" data-setting="frontMatter" aria-label="Front matter">
+                      <option value="card" data-i18n="frontMatterCard">显示为信息卡片</option>
+                      <option value="hide" data-i18n="frontMatterHide">隐藏</option>
+                      <option value="raw" data-i18n="frontMatterRaw">保留原始文本</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- ------------------------------------------------ behaviour -->
+            <section class="md-card" aria-labelledby="opt-behavior">
+              <div class="md-card-head">
+                <span class="md-card-icon" data-icon="sliders" aria-hidden="true"></span>
+                <div class="md-card-heading">
+                  <h2 id="opt-behavior" data-i18n="sectionBehavior">行为</h2>
+                  <p data-i18n="sectionBehaviorDesc">自动识别、实时刷新与文件权限</p>
+                </div>
+              </div>
+              <div class="md-card-body">
+                <label class="md-switch-row">
+                  <span class="md-switch-text">
+                    <b data-i18n="autoRender">自动渲染 Markdown 页面</b>
+                    <small data-i18n="autoRenderDesc">识别 .md 链接与 Markdown 内容类型</small>
+                  </span>
+                  <input type="checkbox" class="md-switch" data-setting="autoRender" />
+                </label>
+                <label class="md-switch-row">
+                  <span class="md-switch-text">
+                    <b data-i18n="plainTextHint">纯文本页面提示</b>
+                    <small data-i18n="plainTextHintDesc">检测到疑似 Markdown 时显示悬浮按钮</small>
+                  </span>
+                  <input type="checkbox" class="md-switch" data-setting="plainTextHint" />
+                </label>
+                <label class="md-switch-row">
+                  <span class="md-switch-text">
+                    <b data-i18n="liveReload">在线文档自动刷新</b>
+                    <small data-i18n="liveReloadDesc">源文件变化时自动重新渲染（仅 http/https）</small>
+                  </span>
+                  <input type="checkbox" class="md-switch" data-setting="liveReload" />
+                </label>
+
+                <div class="md-info-box">
+                  <span id="md-info-icon" aria-hidden="true"></span>
+                  <div>
+                    <b data-i18n="fileAccessTitle">阅读本地 .md 文件</b>
+                    <p data-i18n-html="fileAccessBody">
+                      在扩展管理页打开本扩展的「详情」，开启「允许访问文件网址」，即可直接打开
+                      <code>file://</code> 下的 Markdown 文件。也可以随时用「打开本地文件」按钮选择文件，无需该权限。
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- ------------------------------------------------ custom css -->
+            <section class="md-card" aria-labelledby="opt-css">
+              <div class="md-card-head">
+                <span class="md-card-icon" data-icon="code" aria-hidden="true"></span>
+                <div class="md-card-heading">
+                  <h2 id="opt-css" data-i18n="sectionCustomCss">自定义 CSS</h2>
+                  <p data-i18n="sectionCustomCssDesc">追加到阅读页面，适合调整字体、行距或公司文档样式</p>
+                </div>
+              </div>
+              <div class="md-card-body">
+                <textarea
+                  class="md-textarea"
+                  data-setting="customCss"
+                  rows="7"
+                  spellcheck="false"
+                  aria-label="自定义 CSS"
+                  data-i18n-placeholder="customCssPlaceholder"
+                  placeholder=".md-article h1 { letter-spacing: 0; }"
+                ></textarea>
+                <div class="md-action-row">
+                  <button type="button" class="md-quiet-btn" id="md-css-clear" data-i18n="customCssReset">
+                    清空
+                  </button>
+                  <span class="md-css-status" id="md-css-status" data-i18n="customCssSaved">已保存</span>
+                </div>
+              </div>
+            </section>
+
+            <!-- ------------------------------------------------ data -->
+            <section class="md-card" aria-labelledby="opt-data">
+              <div class="md-card-head">
+                <span class="md-card-icon" data-icon="shield" aria-hidden="true"></span>
+                <div class="md-card-heading">
+                  <h2 id="opt-data" data-i18n="sectionData">数据与同步</h2>
+                  <p data-i18n="sectionDataDesc">导出、导入或重置全部偏好设置</p>
+                </div>
+              </div>
+              <div class="md-card-body">
+                <p class="md-data-note" data-i18n="dataNote">
+                  设置保存在浏览器的 sync 存储中，可通过 Chrome 账号同步到其他设备。
+                </p>
+                <div class="md-action-row">
+                  <button type="button" class="md-ghost-btn" id="md-export-2">
+                    <span class="md-options-btn-icon" id="md-export-2-icon" aria-hidden="true"></span>
+                    <span data-i18n="exportSettings">导出</span>
+                  </button>
+                  <button type="button" class="md-ghost-btn" id="md-import-2">
+                    <span class="md-options-btn-icon" id="md-import-2-icon" aria-hidden="true"></span>
+                    <span data-i18n="importSettings">导入</span>
+                  </button>
+                  <button type="button" class="md-danger-btn" id="md-reset-2">
+                    <span class="md-options-btn-icon" id="md-reset-2-icon" aria-hidden="true"></span>
+                    <span data-i18n="resetSettings">恢复默认</span>
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            <!-- ------------------------------------------------ about -->
+            <section class="md-card" aria-labelledby="opt-about">
+              <div class="md-card-head">
+                <span class="md-card-icon" data-icon="info" aria-hidden="true"></span>
+                <div class="md-card-heading">
+                  <div class="md-about-head">
+                    <h2 id="opt-about" data-i18n="sectionAbout">关于</h2>
+                    <span class="md-version-badge" id="md-version">v1.0.0</span>
+                  </div>
+                  <p data-i18n="sectionAboutDesc">版本信息、支持语法与隐私</p>
+                </div>
+              </div>
+              <div class="md-card-body">
+                <p class="md-data-note" data-i18n="aboutIntro">
+                  MD Reader Pro 是一个完全离线的 Markdown 阅读器：所有文档只在本机解析与渲染，不会上传任何内容。
+                </p>
+                <ul class="md-about-list">
+                  <li data-i18n-html="aboutFeatureSyntax"></li>
+                  <li data-i18n-html="aboutFeatureShortcut"></li>
+                  <li data-i18n-html="aboutFeatureViewer"></li>
+                </ul>
+              </div>
+            </section>
+          </div>
+
+          <!-- ------------------------------------------------ preview -->
+          <aside class="md-options-aside" aria-label="实时预览">
+            <div class="md-preview">
+              <div class="md-preview-head">
+                <span class="md-preview-title">
+                  <span id="md-preview-icon" aria-hidden="true"></span>
+                  <span data-i18n="previewTitle">实时预览</span>
+                </span>
+                <span class="md-preview-meta" id="md-preview-meta">12px · 1.75</span>
+              </div>
+              <div class="md-preview-paper" id="md-preview-paper">
+                <h3 data-i18n="previewHeading">阅读的样子</h3>
+                <p data-i18n="previewParagraph">
+                  好的排版让长文变得轻松。调整左侧的字号、行高与字体，这里会立刻更新。
+                </p>
+                <blockquote data-i18n="previewQuote">文字应当退到内容之后，让读者只看见想法。</blockquote>
+                <pre><code><b>const</b> reader = <i>createReader</i>();
+reader.render(markdown);</code></pre>
+                <ul>
+                  <li>CommonMark &amp; GFM</li>
+                  <li>KaTeX · Mermaid</li>
+                </ul>
+                <div class="md-preview-alert">
+                  <span><b data-i18n="previewAlertTitle">提示</b> <span data-i18n="previewAlertBody">所有设置只保存在本地浏览器中。</span></span>
+                </div>
+              </div>
+              <div class="md-preview-foot">
+                <span data-i18n="previewFoot">MD Reader Pro</span>
+                <span id="md-preview-foot-meta">16 px</span>
+              </div>
+            </div>
+            <p class="md-preview-tip">
+              <span data-i18n="previewTip">小提示：设置会实时同步到已打开的阅读页面，无需刷新。</span>
+            </p>
+          </aside>
+        </div>
+      </main>
+
+      <footer class="md-options-footer">
+        <span data-i18n-html="optionsFooterLeft">MD Reader Pro <b>v1.0.0</b></span>
+        <span data-i18n="optionsFooterRight">本地渲染 · 隐私友好 · 无网络请求</span>
+      </footer>
+    </div>
+
+    <input type="file" id="md-import-file" accept="application/json,.json" hidden />
+
+    <dialog class="md-dialog" id="md-reset-dialog" aria-labelledby="md-reset-title">
+      <form class="md-dialog-inner" method="dialog">
+        <h2 class="md-dialog-title" id="md-reset-title" data-i18n="resetTitle">恢复默认设置？</h2>
+        <p class="md-dialog-desc" data-i18n="resetDesc">
+          所有外观、阅读与渲染选项都会回到初始值，自定义 CSS 也会被清空。此操作无法撤销。
+        </p>
+        <div class="md-dialog-actions">
+          <button type="button" class="md-quiet-btn" id="md-reset-cancel" data-i18n="cancel">取消</button>
+          <button type="button" class="md-danger-btn" id="md-reset-confirm" data-i18n="resetConfirm">
+            恢复默认
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <div class="md-toast" id="md-toast" role="status" hidden></div>
+    <script src="./options.js"></script>
+  </body>
+</html>

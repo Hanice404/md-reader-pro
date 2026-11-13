@@ -1,0 +1,9 @@
+node_modules/
+dist/
+release/
+.chrome/
+.tmp/
+test/screenshots/*.png
+test/last-run.json
+.DS_Store
+*.log

@@ -1,0 +1,240 @@
+/* ============================================================
+   MD Reader Pro — print stylesheet
+   Printing should always look like ink on paper, whatever the
+   on-screen theme is.
+   ============================================================ */
+
+@media print {
+  @page {
+    margin: 16mm 14mm 18mm;
+  }
+
+  html[data-md-reader][data-md-theme] {
+    color-scheme: light;
+    --md-bg: #ffffff;
+    --md-bg-soft: #ffffff;
+    --md-surface: #ffffff;
+    --md-surface-muted: #f5f5f4;
+    --md-surface-raised: #ffffff;
+    --md-text: #111111;
+    --md-text-strong: #000000;
+    --md-muted: #3c3c3c;
+    --md-faint: #666666;
+    --md-border: #cccccc;
+    --md-border-soft: #e2e2e2;
+    --md-accent: #0a4f45;
+    --md-accent-strong: #083c34;
+    --md-accent-soft: #eef4f2;
+    --md-accent-line: rgba(10, 79, 69, 0.4);
+    --md-code-bg: #f6f6f5;
+    --md-code-head: #eeeeed;
+    --md-quote-border: #cccccc;
+    --md-mark: #f4e7a6;
+    --md-mark-text: #332a00;
+    --md-code-keyword: #8d241f;
+    --md-code-string: #145c30;
+    --md-code-number: #7a3f0c;
+    --md-code-title: #4f3285;
+    --md-code-attr: #124c85;
+    --md-code-comment: #666666;
+    --md-code-meta: #666666;
+    --md-code-add-bg: #eef7f0;
+    --md-code-add-text: #145c30;
+    --md-code-del-bg: #fbeeee;
+    --md-code-del-text: #8d241f;
+    background: #ffffff !important;
+    color: #111111 !important;
+  }
+
+  html[data-md-reader] body,
+  html[data-md-app] body {
+    height: auto !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+    color: #111111 !important;
+  }
+
+  html[data-md-app] .md-app {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  .md-toolbar,
+  .md-progress,
+  .md-sidebar,
+  .md-scrim,
+  .md-top,
+  .md-lightbox,
+  .md-notice,
+  .md-footer,
+  .md-skip-link,
+  .md-toast,
+  .md-code-copy,
+  .md-raw-head,
+  .md-code-head,
+  .md-mermaid-toolbar {
+    display: none !important;
+  }
+
+  .md-body {
+    display: block !important;
+    overflow: visible !important;
+    min-height: 0 !important;
+  }
+
+  .md-main {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+    scrollbar-gutter: auto;
+  }
+
+  .md-main,
+  .md-article,
+  .md-raw-view {
+    width: auto !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .md-article {
+    font-size: 10.6pt;
+    line-height: 1.62;
+    color: #111111;
+  }
+
+  .md-article a {
+    color: #111111 !important;
+    text-decoration: underline !important;
+  }
+
+  .md-article a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 8.4pt;
+    font-weight: 400;
+    color: #555555;
+    word-break: break-all;
+  }
+
+  .md-heading .md-anchor {
+    display: none !important;
+  }
+
+  .md-article h1 {
+    font-size: 22pt;
+    break-after: avoid;
+  }
+
+  .md-article h2 {
+    font-size: 15pt;
+    break-after: avoid;
+  }
+
+  .md-article h3,
+  .md-article h4 {
+    break-after: avoid;
+  }
+
+  .md-article p,
+  .md-article li {
+    orphans: 3;
+    widows: 3;
+  }
+
+  .md-code,
+  .md-article blockquote,
+  .md-article .md-alert,
+  .md-article .markdown-alert,
+  .md-article .md-mermaid,
+  .md-figure,
+  .md-article details,
+  .md-frontmatter,
+  .md-table-wrap {
+    break-inside: avoid;
+  }
+
+  .md-code {
+    border: 1px solid #d8d8d8;
+    background: #f7f7f6;
+    box-shadow: none;
+  }
+
+  .md-code pre code,
+  .md-code.has-gutter .md-code-gutter {
+    font-size: 8.8pt;
+    line-height: 1.5;
+  }
+
+  .md-code.has-gutter .md-code-gutter {
+    display: none;
+  }
+
+  .md-table-wrap {
+    overflow: visible !important;
+    border: 1px solid #d8d8d8;
+    box-shadow: none;
+  }
+
+  .md-article table {
+    font-size: 8.8pt;
+  }
+
+  .md-article th {
+    background: #f0f0ef !important;
+    white-space: normal;
+  }
+
+  .md-article tr {
+    break-inside: avoid;
+  }
+
+  .md-article img {
+    max-height: 26cm;
+    break-inside: avoid;
+  }
+
+  .md-article .md-mermaid-body {
+    padding: 10px 0;
+  }
+
+  .md-article .md-mermaid-src {
+    display: none !important;
+  }
+
+  .md-article .md-alert,
+  .md-article .markdown-alert,
+  .md-article .custom-block {
+    border: 1px solid #d8d8d8;
+    border-left: 3px solid var(--md-alert-color);
+    background: #ffffff !important;
+  }
+
+  .md-article .md-alert::before,
+  .md-article .markdown-alert::before,
+  .md-article .custom-block::before {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .md-article .katex-display {
+    overflow: visible !important;
+  }
+
+  .md-raw {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    white-space: pre-wrap;
+    font-size: 9pt;
+  }
+
+  .md-app,
+  .md-app * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

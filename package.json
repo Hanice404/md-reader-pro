@@ -1,0 +1,63 @@
+{
+  "name": "md-reader-pro",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "MD Reader Pro — a fast, beautiful, fully offline Markdown reader for Chrome and Edge",
+  "license": "MIT",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "node build.mjs --watch",
+    "test": "node test/e2e.mjs",
+    "zip": "node scripts/zip.mjs",
+    "icons": "node scripts/icons.mjs",
+    "screenshots": "node scripts/screenshots.mjs"
+  },
+  "dependencies": {
+    "@traptitech/markdown-it-katex": "^3.6.0",
+    "dompurify": "^3.4.17",
+    "highlight.js": "^11.12.0",
+    "js-yaml": "^4.1.0",
+    "katex": "^0.19.1",
+    "markdown-it": "^14.1.0",
+    "markdown-it-abbr": "^2.0.0",
+    "markdown-it-anchor": "^10.1.0",
+    "markdown-it-attrs": "^5.0.1",
+    "markdown-it-container": "^4.0.0",
+    "markdown-it-deflist": "^4.0.0",
+    "markdown-it-emoji": "^3.1.0",
+    "markdown-it-footnote": "^4.0.0",
+    "markdown-it-github-alerts": "^1.0.1",
+    "markdown-it-ins": "^4.0.0",
+    "markdown-it-mark": "^4.0.0",
+    "markdown-it-multimd-table": "^4.2.3",
+    "markdown-it-sub": "^2.0.0",
+    "markdown-it-sup": "^2.0.0",
+    "markdown-it-task-lists": "^2.1.1",
+    "mermaid": "^12.3.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "puppeteer-core": "^25.17.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hanice404/md-reader-pro.git"
+  },
+  "homepage": "https://github.com/Hanice404/md-reader-pro#readme",
+  "bugs": {
+    "url": "https://github.com/Hanice404/md-reader-pro/issues"
+  },
+  "keywords": [
+    "chrome-extension",
+    "markdown",
+    "markdown-reader",
+    "manifest-v3",
+    "gfm",
+    "katex",
+    "mermaid"
+  ],
+  "engines": {
+    "node": ">=20"
+  }
+}

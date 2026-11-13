@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-CN" data-md-reader="surface" data-md-theme="auto">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>MD Reader Pro</title>
+    <link rel="stylesheet" href="./reader.css" />
+  </head>
+  <body class="md-popup-body">
+    <div class="md-popup">
+      <header class="md-popup-header">
+        <div class="md-popup-brand">
+          <span class="md-logo-mark md-logo-small" aria-hidden="true">M<span>↓</span></span>
+          <div class="md-brand-text">
+            <div class="md-popup-name">MD Reader <b>Pro</b></div>
+            <div class="md-popup-tagline" data-i18n="popupTagline">优雅地阅读 Markdown</div>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="md-btn"
+          id="open-options"
+          data-tip="设置"
+          data-i18n-title="settings"
+          aria-label="设置"
+        ></button>
+      </header>
+
+      <section class="md-popup-card md-popup-status-card" id="status-card" data-state="detecting">
+        <div class="md-popup-page">
+          <span class="md-popup-favicon-wrap">
+            <span class="md-popup-page-icon" id="page-icon" aria-hidden="true"></span>
+            <img class="md-popup-favicon" id="page-favicon" alt="" hidden />
+          </span>
+          <div class="md-popup-page-text">
+            <div class="md-popup-page-title" id="page-title" data-i18n="pageDetecting">
+              正在检测当前页面…
+            </div>
+            <div class="md-popup-page-url" id="page-url"></div>
+          </div>
+        </div>
+
+        <div class="md-status-row">
+          <span class="md-status-dot" aria-hidden="true"></span>
+          <span id="page-status" data-i18n="statusDetecting">正在检测…</span>
+        </div>
+
+        <button type="button" class="md-primary-btn md-block" id="render-page" disabled>
+          <span class="md-popup-btn-icon" id="render-icon" aria-hidden="true"></span>
+          <span id="render-label" data-i18n="actionRender">以 Markdown 阅读</span>
+        </button>
+        <p class="md-popup-hint" id="render-hint" data-i18n="openFileHint">
+          支持拖拽、粘贴与文件选择
+        </p>
+      </section>
+
+      <section class="md-popup-card md-popup-actions">
+        <div class="md-popup-action-row">
+          <button type="button" class="md-ghost-btn md-popup-action" id="open-file">
+            <span class="md-popup-action-icon" id="open-file-icon" aria-hidden="true"></span>
+            <span data-i18n="openLocalFile">打开本地文件</span>
+          </button>
+          <button type="button" class="md-ghost-btn md-popup-action" id="open-viewer">
+            <span class="md-popup-action-icon" id="open-viewer-icon" aria-hidden="true"></span>
+            <span data-i18n="openViewer">独立阅读器</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="md-popup-card">
+        <div class="md-popup-card-head">
+          <span class="md-popup-label" data-i18n="theme">阅读主题</span>
+          <span class="md-popup-label-hint" id="theme-name"></span>
+        </div>
+        <div class="md-theme-row" role="group" aria-label="阅读主题">
+          <button type="button" class="md-theme-chip" data-theme="light" aria-pressed="false">
+            <span class="md-theme-swatch" data-swatch="light" aria-hidden="true"></span>
+            <span data-i18n="themeLight">浅色</span>
+          </button>
+          <button type="button" class="md-theme-chip" data-theme="dark" aria-pressed="false">
+            <span class="md-theme-swatch" data-swatch="dark" aria-hidden="true"></span>
+            <span data-i18n="themeDark">深色</span>
+          </button>
+          <button type="button" class="md-theme-chip" data-theme="sepia" aria-pressed="false">
+            <span class="md-theme-swatch" data-swatch="sepia" aria-hidden="true"></span>
+            <span data-i18n="themeSepia">护眼</span>
+          </button>
+          <button type="button" class="md-theme-chip" data-theme="auto" aria-pressed="false">
+            <span class="md-theme-swatch" data-swatch="auto" aria-hidden="true"></span>
+            <span data-i18n="themeAuto">跟随系统</span>
+          </button>
+        </div>
+      </section>
+
+      <footer class="md-popup-footer">
+        <span class="md-popup-shortcut">
+          <span class="md-kbd">Alt</span><span>+</span><span class="md-kbd">Shift</span
+          ><span>+</span><span class="md-kbd">M</span>
+          <span data-i18n="shortcutToggle">切换阅读模式</span>
+        </span>
+        <span class="md-popup-version" id="version">v1.0.0</span>
+      </footer>
+    </div>
+    <div class="md-toast" id="md-toast" role="status" hidden></div>
+    <script src="./popup.js"></script>
+  </body>
+</html>

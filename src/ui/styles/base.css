@@ -1,0 +1,521 @@
+/* ============================================================
+   MD Reader Pro — base reset + shared primitives
+   Everything is namespaced under `html[data-md-reader]` / `.md-*`
+   so injecting reader.css into a host page cannot leak element
+   styling into that page.
+   ============================================================ */
+
+html[data-md-reader] {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: auto !important;
+  min-width: 0 !important;
+  background: var(--md-bg) !important;
+  color: var(--md-text) !important;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+html[data-md-reader] body {
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 100vh;
+  background: var(--md-bg) !important;
+  color: var(--md-text);
+  font-family: var(--md-font-sans);
+  overflow-x: hidden;
+}
+
+html[data-md-reader] [hidden],
+.md-app [hidden] {
+  display: none !important;
+}
+
+html[data-md-reader] *,
+html[data-md-reader] *::before,
+html[data-md-reader] *::after {
+  box-sizing: border-box;
+}
+
+.md-app {
+  --md-reading-font: var(--md-font-sans);
+  position: relative;
+  min-height: 100vh;
+  background: var(--md-bg);
+  color: var(--md-text);
+  font-family: var(--md-font-sans);
+  font-size: var(--md-font-size);
+  line-height: var(--md-line-height);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.md-app[data-md-font="serif"] {
+  --md-reading-font: var(--md-font-serif);
+}
+/* Fixed application shell: toolbar + TOC stay put, only `.md-main` scrolls. */
+html[data-md-app="1"] body {
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+html[data-md-app="1"] .md-app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+
+.md-app ::selection,
+.md-app::selection {
+  background: var(--md-selection);
+  color: var(--md-text-strong);
+}
+
+.md-app :focus-visible,
+html[data-md-reader] :focus-visible {
+  outline: 2px solid var(--md-accent);
+  outline-offset: 2px;
+  border-radius: var(--md-radius-xs);
+}
+
+.md-app button,
+.md-app input,
+.md-app select,
+.md-app textarea {
+  font-family: inherit;
+}
+
+.md-icon {
+  display: block;
+  flex: 0 0 auto;
+  pointer-events: none;
+}
+
+.md-sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.md-skip-link {
+  position: fixed;
+  top: 8px;
+  left: 50%;
+  z-index: 400;
+  transform: translate(-50%, -180%);
+  padding: 9px 18px;
+  border-radius: var(--md-radius-pill);
+  background: var(--md-text-strong);
+  color: var(--md-bg);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: var(--md-shadow-md);
+  transition: transform var(--md-dur) var(--md-ease);
+}
+
+.md-skip-link:focus-visible {
+  transform: translate(-50%, 0);
+  outline-offset: 3px;
+}
+
+/* ------------------------------------------------------------------
+   Icon buttons + tooltips
+   ------------------------------------------------------------------ */
+.md-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--md-radius-sm);
+  background: transparent;
+  color: var(--md-muted);
+  cursor: pointer;
+  transition: transform var(--md-dur-fast) var(--md-ease);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.md-btn:hover {
+  background: var(--md-surface-muted);
+  color: var(--md-text-strong);
+}
+
+.md-btn:active {
+  transform: scale(0.94);
+}
+
+.md-btn.is-active {
+  background: var(--md-accent-soft);
+  color: var(--md-accent);
+}
+
+.md-btn.is-success {
+  color: var(--md-alert-tip);
+  background: var(--md-alert-tip-bg);
+}
+
+.md-btn.is-error {
+  color: var(--md-alert-caution);
+  background: var(--md-alert-caution-bg);
+}
+
+.md-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: transparent;
+  transform: none;
+}
+
+.md-btn[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 9px);
+  left: 50%;
+  z-index: 260;
+  transform: translate(-50%, -3px);
+  padding: 5px 9px;
+  border-radius: var(--md-radius-xs);
+  background: var(--md-text-strong);
+  color: var(--md-bg);
+  font-family: var(--md-font-sans);
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0;
+  white-space: nowrap;
+  box-shadow: var(--md-shadow-sm);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity var(--md-dur-fast) var(--md-ease),
+    transform var(--md-dur-fast) var(--md-ease),
+    visibility var(--md-dur-fast);
+}
+
+.md-btn[data-tip]:hover::after,
+.md-btn[data-tip]:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+
+.md-toolbar-actions .md-btn:last-child[data-tip]::after {
+  left: auto;
+  right: 0;
+  transform: translateY(-3px);
+}
+
+.md-toolbar-actions .md-btn:last-child[data-tip]:hover::after,
+.md-toolbar-actions .md-btn:last-child[data-tip]:focus-visible::after {
+  transform: translateY(0);
+}
+
+/* ------------------------------------------------------------------
+   Buttons
+   ------------------------------------------------------------------ */
+.md-primary-btn,
+.md-ghost-btn,
+.md-quiet-btn,
+.md-danger-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 8px 16px;
+  border-radius: var(--md-radius-sm);
+  border: 1px solid transparent;
+  font-family: var(--md-font-sans);
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.005em;
+  text-decoration: none;
+  cursor: pointer;
+  /* No colour transitions here: themes must switch without an
+     intermediate washed-out frame (see the theme boot sequence). */
+  transition: transform var(--md-dur-fast) var(--md-ease),
+    box-shadow var(--md-dur-fast) var(--md-ease);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.md-primary-btn {
+  border-color: var(--md-accent);
+  background: var(--md-accent);
+  color: var(--md-accent-contrast);
+  box-shadow: var(--md-shadow-sm);
+}
+
+.md-primary-btn:hover:not(:disabled) {
+  background: var(--md-accent-strong);
+  border-color: var(--md-accent-strong);
+}
+
+.md-primary-btn:active:not(:disabled),
+.md-ghost-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.md-primary-btn:disabled {
+  border-color: var(--md-border);
+  background: var(--md-surface-muted);
+  color: var(--md-faint);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.md-ghost-btn {
+  border-color: var(--md-border);
+  background: var(--md-surface);
+  color: var(--md-text);
+  box-shadow: var(--md-shadow-xs);
+}
+
+.md-ghost-btn:hover {
+  border-color: var(--md-faint);
+  background: var(--md-surface-muted);
+}
+
+.md-quiet-btn {
+  background: transparent;
+  border-color: transparent;
+  color: var(--md-muted);
+  box-shadow: none;
+}
+
+.md-quiet-btn:hover {
+  background: var(--md-surface-muted);
+  color: var(--md-text-strong);
+}
+
+.md-danger-btn {
+  border-color: var(--md-alert-caution);
+  background: var(--md-alert-caution-bg);
+  color: var(--md-alert-caution);
+}
+
+.md-danger-btn:hover {
+  background: var(--md-alert-caution);
+  color: #fff;
+}
+
+.md-block {
+  display: flex;
+  width: 100%;
+}
+
+.md-btn-spinner {
+  width: 15px;
+  height: 15px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: md-spin 700ms linear infinite;
+}
+
+@keyframes md-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ------------------------------------------------------------------
+   Brand mark
+   ------------------------------------------------------------------ */
+.md-logo-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #6d6ff2 0%, #4f46e5 58%, #4338ca 100%);
+  color: #ffffff;
+  font-family: var(--md-font-serif);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  box-shadow: 0 2px 9px rgba(79, 70, 229, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.24);
+  user-select: none;
+}
+
+.md-logo-mark span {
+  display: inline-block;
+  margin-top: 6px;
+  color: #c7d2fe;
+  font-family: var(--md-font-sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.md-logo-mark.md-logo-small {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  font-size: 15px;
+}
+
+.md-logo-mark.md-logo-small span {
+  margin-top: 5px;
+  font-size: 9px;
+}
+
+.md-brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.md-brand-name {
+  font-family: var(--md-font-sans);
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+  color: var(--md-text-strong);
+}
+
+.md-brand-name b {
+  color: var(--md-accent);
+  font-weight: 700;
+}
+
+.md-brand-sub {
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--md-faint);
+}
+
+/* ------------------------------------------------------------------
+   Toast
+   ------------------------------------------------------------------ */
+.md-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 30px;
+  z-index: 600;
+  transform: translateX(-50%);
+  max-width: min(90vw, 460px);
+  padding: 10px 18px;
+  border-radius: var(--md-radius-pill);
+  background: var(--md-text-strong);
+  color: var(--md-bg);
+  font-family: var(--md-font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+  box-shadow: var(--md-shadow-lg);
+  animation: md-toast-in var(--md-dur) var(--md-ease);
+}
+
+.md-toast.is-error {
+  background: var(--md-alert-caution);
+  color: #fff;
+}
+
+@keyframes md-toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+}
+
+/* ------------------------------------------------------------------
+   Keyboard hint
+   ------------------------------------------------------------------ */
+.md-kbd {
+  display: inline-block;
+  min-width: 20px;
+  padding: 1px 6px 2px;
+  border: 1px solid var(--md-border);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--md-surface);
+  color: var(--md-muted);
+  font-family: var(--md-font-mono);
+  font-size: 10.5px;
+  line-height: 1.5;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------
+   Scrollbars
+   ------------------------------------------------------------------ */
+.md-app .md-scroll,
+.md-sidebar-inner,
+.md-code pre,
+.md-table-wrap,
+.md-lightbox,
+.md-raw {
+  scrollbar-width: thin;
+  scrollbar-color: var(--md-border) transparent;
+}
+
+.md-app .md-scroll::-webkit-scrollbar,
+.md-sidebar-inner::-webkit-scrollbar,
+.md-code pre::-webkit-scrollbar,
+.md-table-wrap::-webkit-scrollbar,
+.md-raw::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.md-app .md-scroll::-webkit-scrollbar-thumb,
+.md-sidebar-inner::-webkit-scrollbar-thumb,
+.md-code pre::-webkit-scrollbar-thumb,
+.md-table-wrap::-webkit-scrollbar-thumb,
+.md-raw::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: var(--md-radius-pill);
+  background: var(--md-border);
+  background-clip: content-box;
+}
+
+.md-app .md-scroll::-webkit-scrollbar-thumb:hover,
+.md-sidebar-inner::-webkit-scrollbar-thumb:hover {
+  background: var(--md-faint);
+  background-clip: content-box;
+}
+
+/* ------------------------------------------------------------------
+   Motion preferences
+   ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  html[data-md-reader] *,
+  html[data-md-reader] *::before,
+  html[data-md-reader] *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  html[data-md-reader] {
+    scroll-behavior: auto !important;
+  }
+}

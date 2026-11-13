@@ -1,0 +1,14 @@
+/* ============================================================
+   MD Reader Pro — single stylesheet for every surface.
+   Entry point for `npm run build` → dist/reader.css.
+   ============================================================ */
+@import "katex/dist/katex.min.css";
+
+@import "./tokens.css";
+@import "./base.css";
+@import "./markdown.css";
+@import "./reader-chrome.css";
+@import "./viewer.css";
+@import "./popup.css";
+@import "./options.css";
+@import "./print.css";
