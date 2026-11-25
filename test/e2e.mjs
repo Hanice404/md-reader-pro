@@ -391,7 +391,7 @@ async function main() {
       width: document.querySelector('.md-sidebar').getBoundingClientRect().width,
       viewport: window.innerWidth,
     }));
-    check('TOC width caps at 50% of viewport', capped.width <= capped.viewport / 2 + 2, JSON.stringify(capped));
+    check('TOC width caps at 35% of viewport', capped.width <= capped.viewport * 0.35 + 2, JSON.stringify(capped));
 
     const resizedHandle = await (await page.$('.md-sidebar-resizer')).boundingBox();
     const resetX = resizedHandle.x + resizedHandle.width / 2;
@@ -421,6 +421,29 @@ async function main() {
     await wait(100);
     await page.mouse.click(resetHandle.x + resetHandle.width / 2, resetHandle.y + 240);
     await wait(300);
+
+    // Reading progress pill: lives in the toolbar meta, right of reading time.
+    const progressMeta = await page.evaluate(() => {
+      const pill = document.querySelector('.md-doc-progress');
+      return {
+        exists: Boolean(pill),
+        hidden: pill ? pill.hidden : true,
+        text: pill ? pill.textContent.trim() : '',
+        previous: pill?.previousElementSibling?.textContent || '',
+        inMeta: Boolean(pill?.closest('.md-doc-meta')),
+        oldSidebarPill: Boolean(document.querySelector('.md-sidebar-progress')),
+      };
+    });
+    check(
+      'reading progress pill sits right of reading time',
+      progressMeta.exists &&
+        !progressMeta.hidden &&
+        /%/.test(progressMeta.text) &&
+        /(分钟|min)/.test(progressMeta.previous) &&
+        progressMeta.inMeta &&
+        !progressMeta.oldSidebarPill,
+      JSON.stringify(progressMeta),
+    );
 
     // Font zoom control: percentage between − / +, click resets to 100%.
     const zoomStart = await page.$eval('.md-zoom', (el) => el.textContent.trim());

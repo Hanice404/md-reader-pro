@@ -2,6 +2,20 @@
 
 All notable changes to **MD Reader Pro** are documented here.
 
+## [1.0.2] — 2026-11-25
+
+### Changed
+
+- The “N% 已读” capsule moved from the sidebar header to the toolbar metadata, immediately to the right of the reading-time estimate.
+- The resizable TOC width now caps at **35%** of the viewport (was 50%).
+- The resize divider no longer shows an accent/click highlight while dragging; it uses a neutral hairline only.
+
+### Fixed
+
+- Sidebar header is now just the “目录 / Contents” label.
+
+[1.0.2]: https://github.com/Hanice404/md-reader-pro/releases/tag/v1.0.2
+
 ## [1.0.1] — 2026-11-25
 
 ### Added

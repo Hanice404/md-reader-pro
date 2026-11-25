@@ -117,6 +117,24 @@
   vertical-align: middle;
 }
 
+.md-doc-progress {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 7px;
+  padding: 1px 7px;
+  border: 1px solid var(--md-border);
+  border-radius: var(--md-radius-pill);
+  background: var(--md-surface-muted);
+  color: var(--md-muted);
+  font-family: var(--md-font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.7;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
 .md-toolbar-actions {
   display: flex;
   align-items: center;
@@ -228,13 +246,17 @@
 .md-sidebar-resizer:hover::after,
 .md-sidebar-resizer:focus-visible::after,
 .md-sidebar-resizer.is-dragging::after {
-  background: var(--md-accent);
-  opacity: 0.55;
+  background: var(--md-border);
+  opacity: 0.9;
 }
 
 .md-sidebar-resizer:focus-visible {
-  outline: 2px solid var(--md-accent);
-  outline-offset: -2px;
+  outline: 1px solid var(--md-border);
+  outline-offset: -1px;
+}
+
+.md-sidebar-resizer {
+  -webkit-tap-highlight-color: transparent;
 }
 
 .md-app[data-md-resizing="1"] {

@@ -99,6 +99,13 @@ export async function mountReaderApp({
   const fileChip = h('span', { class: 'md-doc-file', hidden: true });
   const docTitle = h('div', { class: 'md-doc-title' }, titleText, fileChip);
   const docMeta = h('div', { class: 'md-doc-meta' });
+  const docProgress = h('span', {
+    class: 'md-doc-progress',
+    text: '0%',
+    hidden: true,
+    title: t('readingProgress'),
+    'aria-label': t('readingProgress'),
+  });
   const headingWrap = h('div', { class: 'md-heading-wrap' }, docTitle, docMeta);
 
   const themeButton = makeIconButton('theme', icons.sun, t('toggleTheme'));
@@ -147,12 +154,6 @@ export async function mountReaderApp({
   );
 
   const tocNav = h('nav', { class: 'md-toc', 'aria-label': t('toc') });
-  const sidebarPercent = h('span', {
-    class: 'md-sidebar-progress',
-    text: '0%',
-    hidden: true,
-    title: t('readingProgress'),
-  });
   const sidebarInner = h(
     'div',
     { class: 'md-sidebar-inner' },
@@ -160,7 +161,6 @@ export async function mountReaderApp({
       'div',
       { class: 'md-sidebar-head' },
       h('span', { class: 'md-sidebar-title', text: t('toc') }),
-      sidebarPercent,
     ),
     tocNav,
   );
@@ -309,7 +309,7 @@ export async function mountReaderApp({
   const TOC_MIN_WIDTH = 200;
 
   function maxTocWidth() {
-    return Math.max(TOC_MIN_WIDTH, Math.floor(window.innerWidth * 0.5));
+    return Math.max(TOC_MIN_WIDTH, Math.floor(window.innerWidth * 0.35));
   }
 
   function clampTocWidth(value) {
@@ -450,7 +450,6 @@ export async function mountReaderApp({
     tocLinks.length = 0;
     if (!headings.length) {
       tocNav.append(h('div', { class: 'md-toc-empty', text: t('noHeadings') }));
-      sidebarPercent.textContent = '0%';
       return;
     }
     const minLevel = Math.min(...headings.map((heading) => heading.level));
@@ -584,10 +583,10 @@ export async function mountReaderApp({
     const ratio = max > 0 ? Math.min(1, Math.max(0, main.scrollTop / max)) : 0;
     progressSpan.style.width = `${(ratio * 100).toFixed(2)}%`;
     const percent = Math.round(ratio * 100);
-    sidebarPercent.hidden = ratio < 0.005;
-    sidebarPercent.textContent = t('percentRead', { percent });
-    sidebarPercent.title = t('readingProgress');
-    sidebarPercent.setAttribute('aria-label', t('percentRead', { percent }));
+    docProgress.hidden = ratio < 0.005;
+    docProgress.textContent = t('percentRead', { percent });
+    docProgress.title = t('readingProgress');
+    docProgress.setAttribute('aria-label', t('percentRead', { percent }));
     topButton.classList.toggle('is-visible', main.scrollTop > 520);
     updateProgressVisibility();
 
@@ -625,16 +624,21 @@ export async function mountReaderApp({
       fileChip.hidden = true;
     }
 
-    const parts = [];
-    if (meta.wordCount) parts.push(t('wordCount', { count: meta.wordCount }));
-    if (meta.readingMinutes) parts.push(t('readingTime', { minutes: meta.readingMinutes }));
-    if (meta.hasMath) parts.push('KaTeX');
-    if (meta.hasMermaid) parts.push('Mermaid');
-    docMeta.textContent = '';
-    parts.forEach((part, index) => {
-      if (index > 0) docMeta.append(h('span', { class: 'md-dot', 'aria-hidden': 'true' }));
-      docMeta.append(h('span', { text: part }));
-    });
+    const metaNodes = [];
+    const addMeta = (node) => {
+      if (metaNodes.length) {
+        metaNodes.push(h('span', { class: 'md-dot', 'aria-hidden': 'true' }));
+      }
+      metaNodes.push(node);
+    };
+    if (meta.wordCount) addMeta(h('span', { text: t('wordCount', { count: meta.wordCount }) }));
+    if (meta.readingMinutes) {
+      addMeta(h('span', { text: t('readingTime', { minutes: meta.readingMinutes }) }));
+      metaNodes.push(docProgress);
+    }
+    if (meta.hasMath) addMeta(h('span', { text: 'KaTeX' }));
+    if (meta.hasMermaid) addMeta(h('span', { text: 'Mermaid' }));
+    docMeta.replaceChildren(...metaNodes);
 
     rawCount.textContent = t('rawLines', { count: countLines(state.markdown) });
 
@@ -710,7 +714,6 @@ export async function mountReaderApp({
       renderer.enhance(article, { theme }).catch(() => {});
     }
 
-    if (!tocLinks.length) sidebarPercent.textContent = '0%';
   }
 
   /* ------------------------------------------------------------- decorate */
@@ -1131,7 +1134,6 @@ export async function mountReaderApp({
   function onResizeStart(event) {
     if (isMobile() || event.button !== 0) return;
     event.preventDefault();
-    sidebarResizer.focus({ preventScroll: true });
     const now = Date.now();
     if (event.detail >= 2 || now - lastResizeDown < 350) {
       lastResizeDown = 0;
