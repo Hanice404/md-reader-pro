@@ -427,12 +427,13 @@ async function main() {
       const pill = document.querySelector('.md-doc-progress');
       const prev = pill?.previousElementSibling;
       const style = pill ? getComputedStyle(pill) : null;
+      const before = pill ? getComputedStyle(pill, '::before') : null;
       return {
         exists: Boolean(pill),
         hidden: pill ? pill.hidden : true,
         text: pill ? pill.textContent.trim() : '',
-        previousIsDot: Boolean(prev?.classList?.contains('md-dot')),
-        beforeDot: prev?.previousElementSibling?.textContent || '',
+        beforeDot: prev?.textContent || '',
+        dotWidth: before?.width || '',
         inMeta: Boolean(pill?.closest('.md-doc-meta')),
         oldSidebarPill: Boolean(document.querySelector('.md-sidebar-progress')),
         background: style?.backgroundColor || '',
@@ -444,8 +445,8 @@ async function main() {
       progressMeta.exists &&
         !progressMeta.hidden &&
         /%/.test(progressMeta.text) &&
-        progressMeta.previousIsDot &&
         /(分钟|min)/.test(progressMeta.beforeDot) &&
+        progressMeta.dotWidth === '3px' &&
         progressMeta.inMeta &&
         !progressMeta.oldSidebarPill &&
         progressMeta.background === 'rgba(0, 0, 0, 0)' &&

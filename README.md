@@ -12,7 +12,11 @@
 
 MD Reader Pro 是一个完全离线的 Chrome 扩展：打开 `.md` 链接、本地 Markdown 文件或任意纯文本页面，即可获得带目录、代码高亮、数学公式、Mermaid 图表和多套主题的阅读界面。所有解析与渲染都在本地完成，文档内容不会离开你的浏览器。
 
-**版本：** v1.0.3 ｜ **兼容：** Chrome 110+ / Edge 110+（Chromium 内核，不支持 Firefox）
+安装扩展后，也可以单独打开内置的**独立阅读器**：点击工具栏弹窗中的「打开独立阅读器」，或访问 `chrome-extension://<扩展 ID>/viewer.html`；拖入本地 `.md` 文件、粘贴 Markdown 文本，或通过 `viewer.html?url=https://...` 打开在线文档。目录、主题、代码高亮、公式和 Mermaid 图表同样可用，适合临时阅读与分享。
+
+![独立阅读器](docs/screenshots/viewer-empty.png)
+
+**版本：** v1.0.4 ｜ **兼容：** Chrome 110+ / Edge 110+（Chromium 内核，不支持 Firefox）
 
 ## 截图
 
@@ -42,7 +46,7 @@ MD Reader Pro 是一个完全离线的 Chrome 扩展：打开 `.md` 链接、本
 - **完整渲染能力**：CommonMark + GFM、脚注、定义列表、缩写、上下标、`==高亮==`、任务列表、GitHub Alerts、多行表格、YAML front matter、KaTeX 数学公式、Mermaid 图表与 highlight.js 代码高亮。
 - **清爽表格**：浅色实线网格、表头底色、对齐方式、行内代码/公式，宽表格横向滚动。
 - **安全的富文本**：原始 HTML 经 DOMPurify 清洗，移除 `<script>`、事件属性、`javascript:` 链接与 iframe。
-- **独立阅读器**：无需先安装扩展也能在阅读器页面拖拽文件、粘贴文本、打开在线 Markdown 链接。
+- **独立阅读器**：无需打开 `.md` 链接，也能在独立页面拖拽文件、粘贴文本、打开在线 Markdown 链接。
 - **实时刷新（可选）**：为 http/https 文档开启轮询，源文件变化时自动重新渲染。
 - **本地优先、零遥测**：没有账号、没有统计、没有远程代码；除文档自身引用的图片外不发起网络请求。
 
@@ -50,7 +54,7 @@ MD Reader Pro 是一个完全离线的 Chrome 扩展：打开 `.md` 链接、本
 
 ### 方式一：下载 Release（推荐）
 
-1. 打开 [Releases](https://github.com/Hanice404/md-reader-pro/releases/latest)，下载 `md-reader-pro-v1.0.3.zip`。
+1. 打开 [Releases](https://github.com/Hanice404/md-reader-pro/releases/latest)，下载 `md-reader-pro-v1.0.4.zip`。
 2. 解压到任意目录（压缩包根目录包含 `manifest.json`）。
 3. 打开 `chrome://extensions`（Edge 为 `edge://extensions`），开启右上角的 **开发者模式**。
 4. 点击 **加载已解压的扩展程序**，选择解压后的文件夹。
@@ -78,6 +82,48 @@ npm run build
 3. 重新打开本地 Markdown 文件。
 
 不开启该权限也可以使用工具栏弹窗中的 **打开本地 Markdown 文件**，或把文件拖进独立阅读器。
+
+## Agent 安装
+
+适用于 Claude Code、Codex、Cursor、Windsurf 等能够执行终端命令的 AI Agent。
+
+### 给 Agent 的提示词
+
+把下面这段直接发给 Agent：
+
+```text
+请帮我安装 MD Reader Pro（Chrome Markdown 阅读扩展）：
+1. git clone https://github.com/Hanice404/md-reader-pro.git
+2. cd md-reader-pro && npm ci && npm run build
+3. 检查 dist/manifest.json 存在，并输出 dist 的绝对路径
+4. 如环境支持 Chrome for Testing，运行 npm test；否则跳过并说明
+5. 打开 chrome://extensions，提示我开启「开发者模式」并「加载已解压的扩展程序」，选择 dist/
+不要修改源码；不要提交 node_modules/、dist/、release/。
+```
+
+### 分工
+
+| 步骤 | Agent | 你 |
+| --- | --- | --- |
+| 克隆仓库、安装依赖、构建 | ✅ | |
+| 运行端到端检查（有 Chrome for Testing 时） | ✅ | |
+| 打包 ZIP（`npm run zip`） | ✅ | |
+| 在 Chrome 中加载 `dist/` | | ✅ Chrome 不允许命令行静默安装到日常浏览器 |
+| 开启「允许访问文件网址」 | | ✅ 可选 |
+
+> Chrome 的「加载已解压的扩展程序」必须由用户在 `chrome://extensions` 手动确认；Agent 可以完成构建、校验和路径准备，但不能绕过这一步。
+
+### 非交互环境
+
+如果 Agent 运行在 CI 或无 GUI 环境，只需要让它构建并打包：
+
+```bash
+npm ci
+npm run build
+npm run zip
+```
+
+然后把 `release/md-reader-pro-v1.0.4.zip` 交给用户安装即可。需要自动化浏览器验证时，使用仓库自带的 `test/e2e.mjs`（Chrome for Testing + Puppeteer）。
 
 ## 使用方法
 
@@ -170,7 +216,7 @@ npm run build
 | `npm run build` | 构建到 `dist/`，并校验 manifest 引用的文件是否存在 |
 | `npm run dev` | 监听源码变化，增量构建（开发用，含 sourcemap） |
 | `npm test` | Puppeteer 端到端测试（见下方说明） |
-| `npm run zip` | 把 `dist/` 打包为 `release/md-reader-pro-v1.0.3.zip` |
+| `npm run zip` | 把 `dist/` 打包为 `release/md-reader-pro-v1.0.4.zip` |
 | `npm run icons` | 由 `scripts/icons.mjs` 重新生成图标（需要 Python + Pillow） |
 
 端到端测试使用 **Chrome for Testing**（品牌版 Chrome 会忽略 `--load-extension`，无法加载未打包扩展）。首次运行：

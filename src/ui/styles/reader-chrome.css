@@ -117,6 +117,17 @@
   vertical-align: middle;
 }
 
+.md-doc-progress::before {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  margin: 0 6px;
+  border-radius: 50%;
+  background: var(--md-border);
+  vertical-align: middle;
+}
+
 .md-doc-progress {
   display: inline;
   margin: 0;

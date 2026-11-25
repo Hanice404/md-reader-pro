@@ -2,6 +2,19 @@
 
 All notable changes to **MD Reader Pro** are documented here.
 
+## [1.0.4] — 2026-11-25
+
+### Changed
+
+- README now introduces the standalone viewer with a screenshot.
+- Added an Agent installation guide (prompt, automation boundary, non-interactive build).
+
+### Fixed
+
+- No duplicate dot separator when the reading-progress text is hidden at the top of a document.
+
+[1.0.4]: https://github.com/Hanice404/md-reader-pro/releases/tag/v1.0.4
+
 ## [1.0.3] — 2026-11-25
 
 ### Changed
