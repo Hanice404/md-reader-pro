@@ -164,10 +164,21 @@ export async function mountReaderApp({
     ),
     tocNav,
   );
+  const sidebarResizer = h('div', {
+    class: 'md-sidebar-resizer',
+    role: 'separator',
+    'aria-orientation': 'vertical',
+    'aria-valuemin': '200',
+    'aria-valuenow': '272',
+    tabindex: '0',
+    title: t('resizeToc'),
+    'aria-label': t('resizeToc'),
+  });
   const sidebar = h(
     'aside',
     { class: 'md-sidebar', id: 'md-sidebar', 'aria-label': t('toc') },
     sidebarInner,
+    sidebarResizer,
   );
   const scrim = h('div', { class: 'md-scrim', hidden: true, 'aria-hidden': 'true' });
   const progressSpan = h('span');
@@ -294,6 +305,36 @@ export async function mountReaderApp({
     root.append(customStyleElement);
   }
 
+  const TOC_DEFAULT_WIDTH = 272;
+  const TOC_MIN_WIDTH = 200;
+
+  function maxTocWidth() {
+    return Math.max(TOC_MIN_WIDTH, Math.floor(window.innerWidth * 0.5));
+  }
+
+  function clampTocWidth(value) {
+    const width = Number(value);
+    const fallback = Number.isFinite(width) ? width : TOC_DEFAULT_WIDTH;
+    return Math.min(maxTocWidth(), Math.max(TOC_MIN_WIDTH, Math.round(fallback)));
+  }
+
+  function applySidebarWidth() {
+    const width = clampTocWidth(state.settings.tocWidth);
+    state.settings.tocWidth = width;
+    root.style.setProperty('--md-sidebar-width', `${width}px`);
+    sidebarResizer.setAttribute('aria-valuenow', String(width));
+    sidebarResizer.setAttribute('aria-valuemax', String(maxTocWidth()));
+  }
+
+  function setSidebarWidth(width, { persist = false } = {}) {
+    const next = clampTocWidth(width);
+    state.settings.tocWidth = next;
+    root.style.setProperty('--md-sidebar-width', `${next}px`);
+    sidebarResizer.setAttribute('aria-valuenow', String(next));
+    sidebarResizer.setAttribute('aria-valuemax', String(maxTocWidth()));
+    if (persist) commit({ tocWidth: next });
+  }
+
   function applyTheme({ refreshDiagrams = true } = {}) {
     const html = document.documentElement;
     const theme = resolvedTheme(state.settings.theme);
@@ -306,6 +347,7 @@ export async function mountReaderApp({
     root.dataset.mdWidth = state.settings.contentWidth || 'normal';
     root.dataset.mdFont = state.settings.fontFamily || 'sans';
     root.dataset.mdToc = state.settings.showToc === false ? 'closed' : 'open';
+    applySidebarWidth();
     root.style.setProperty('--md-font-size', `${clampFontSize(state.settings.fontSize)}px`);
     root.style.setProperty('--md-line-height', String(clampLineHeight(state.settings.lineHeight)));
     applyCustomCss();
@@ -1070,6 +1112,7 @@ export async function mountReaderApp({
 
   const onResize = () => {
     if (!isMobile() && state.drawerOpen) closeDrawer();
+    applySidebarWidth();
     updateTocButton();
     requestScrollUpdate();
   };
@@ -1080,6 +1123,62 @@ export async function mountReaderApp({
   };
 
   const onScroll = () => requestScrollUpdate();
+
+  /* ------------------------------------------------------- toc resizer */
+  let resizePointerId = null;
+  let lastResizeDown = 0;
+
+  function onResizeStart(event) {
+    if (isMobile() || event.button !== 0) return;
+    event.preventDefault();
+    sidebarResizer.focus({ preventScroll: true });
+    const now = Date.now();
+    if (event.detail >= 2 || now - lastResizeDown < 350) {
+      lastResizeDown = 0;
+      commit({ tocWidth: TOC_DEFAULT_WIDTH });
+      return;
+    }
+    lastResizeDown = now;
+    resizePointerId = event.pointerId;
+    root.dataset.mdResizing = '1';
+    sidebarResizer.classList.add('is-dragging');
+    window.addEventListener('pointermove', onResizeMove, { passive: true });
+    window.addEventListener('pointerup', onResizeEnd);
+    window.addEventListener('pointercancel', onResizeEnd);
+  }
+
+  function onResizeMove(event) {
+    if (event.pointerId !== resizePointerId) return;
+    setSidebarWidth(event.clientX);
+  }
+
+  function onResizeEnd(event) {
+    if (event.pointerId !== resizePointerId) return;
+    resizePointerId = null;
+    window.removeEventListener('pointermove', onResizeMove);
+    window.removeEventListener('pointerup', onResizeEnd);
+    window.removeEventListener('pointercancel', onResizeEnd);
+    sidebarResizer.classList.remove('is-dragging');
+    delete root.dataset.mdResizing;
+    commit({ tocWidth: state.settings.tocWidth });
+  }
+
+  function onResizeKeydown(event) {
+    const step = event.shiftKey ? 32 : 16;
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      event.preventDefault();
+      commit({
+        tocWidth: state.settings.tocWidth + (event.key === 'ArrowLeft' ? -step : step),
+      });
+    } else if (event.key === 'Home' || event.key === '0') {
+      event.preventDefault();
+      commit({ tocWidth: TOC_DEFAULT_WIDTH });
+    }
+  }
+
+  sidebarResizer.addEventListener('pointerdown', onResizeStart);
+  sidebarResizer.addEventListener('keydown', onResizeKeydown);
+  sidebarResizer.addEventListener('dblclick', () => commit({ tocWidth: TOC_DEFAULT_WIDTH }));
 
   /* ------------------------------------------------------------- wiring */
   root.addEventListener('click', onRootClick);

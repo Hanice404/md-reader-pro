@@ -2,6 +2,19 @@
 
 All notable changes to **MD Reader Pro** are documented here.
 
+## [1.0.1] — 2026-11-25
+
+### Added
+
+- Table-of-contents labels now stay on one line and truncate with an ellipsis; the full heading is available as a tooltip.
+- The TOC sidebar is resizable by dragging its right edge (or with the keyboard arrows when the handle is focused), capped at **50% of the viewport width**; double-click the handle to restore the default width. The width is persisted in settings.
+
+### Changed
+
+- Options copy now explains the resizable TOC.
+
+[1.0.1]: https://github.com/Hanice404/md-reader-pro/releases/tag/v1.0.1
+
 ## [1.0.0] — 2026-11-13
 
 ### Added

@@ -21,6 +21,8 @@ export const DEFAULT_SETTINGS = Object.freeze({
   fontFamily: 'sans',
   /** Show the table-of-contents sidebar. */
   showToc: true,
+  /** Sidebar width in px (200 - 50% of viewport). */
+  tocWidth: 272,
   /** Add line numbers to fenced code blocks. */
   codeLineNumbers: false,
   /** Soft-wrap long code lines. */
@@ -58,6 +60,7 @@ export const SETTINGS_SCHEMA = Object.freeze({
   contentWidth: { type: 'enum', values: ['normal', 'wide', 'full'] },
   fontFamily: { type: 'enum', values: ['sans', 'serif'] },
   showToc: { type: 'boolean' },
+  tocWidth: { type: 'number', min: 200, max: 1600, step: 1 },
   codeLineNumbers: { type: 'boolean' },
   codeWrap: { type: 'boolean' },
   readingProgress: { type: 'boolean' },

@@ -12,7 +12,7 @@
 
 MD Reader Pro 是一个完全离线的 Chrome 扩展：打开 `.md` 链接、本地 Markdown 文件或任意纯文本页面，即可获得带目录、代码高亮、数学公式、Mermaid 图表和多套主题的阅读界面。所有解析与渲染都在本地完成，文档内容不会离开你的浏览器。
 
-**版本：** v1.0.0 ｜ **兼容：** Chrome 110+ / Edge 110+（Chromium 内核，不支持 Firefox）
+**版本：** v1.0.1 ｜ **兼容：** Chrome 110+ / Edge 110+（Chromium 内核，不支持 Firefox）
 
 ## 截图
 
@@ -37,7 +37,7 @@ MD Reader Pro 是一个完全离线的 Chrome 扩展：打开 `.md` 链接、本
 - **自动识别 Markdown**：`text/markdown` 内容类型、以 `.md` / `.markdown` / `.mdown` / `.mkd` / `.mdx` 结尾的链接（大小写、query、hash 均可），以及 GitHub / GitLab / Gitee / Bitbucket 等 raw 地址。
 - **不会误伤网页**：即使 URL 以 `.md` 结尾，只要是 `text/html` 页面就绝不自动接管；PDF、`view-source:`、`chrome://` 等受保护页面会直接跳过。
 - **纯文本提示**：`text/plain` 页面被检测到 2 类以上 Markdown 特征时，右下角出现悬浮按钮，点击才进入阅读模式。
-- **专业阅读体验**：顶部工具栏与侧边目录固定，正文独立滚动；右上角 − / + 之间显示字号百分比，点击即恢复 100%；自动目录与滚动高亮、阅读进度、代码复制、图片灯箱、回到顶部、打印 / 导出 PDF、源码切换、Markdown 复制。
+- **专业阅读体验**：顶部工具栏与侧边目录固定，正文独立滚动；目录标题单行显示、超出省略，拖动目录右边缘可调宽度（最大 50% 屏幕）；右上角 − / + 之间显示字号百分比，点击即恢复 100%；自动目录与滚动高亮、阅读进度、代码复制、图片灯箱、回到顶部、打印 / 导出 PDF、源码切换、Markdown 复制。
 - **四种主题**：浅色、深色、护眼、跟随系统；字号、行高、阅读宽度与衬线 / 无衬线字体均可调节。
 - **完整渲染能力**：CommonMark + GFM、脚注、定义列表、缩写、上下标、`==高亮==`、任务列表、GitHub Alerts、多行表格、YAML front matter、KaTeX 数学公式、Mermaid 图表与 highlight.js 代码高亮。
 - **清爽表格**：浅色实线网格、表头底色、对齐方式、行内代码/公式，宽表格横向滚动。
@@ -50,7 +50,7 @@ MD Reader Pro 是一个完全离线的 Chrome 扩展：打开 `.md` 链接、本
 
 ### 方式一：下载 Release（推荐）
 
-1. 打开 [Releases](https://github.com/Hanice404/md-reader-pro/releases/latest)，下载 `md-reader-pro-v1.0.0.zip`。
+1. 打开 [Releases](https://github.com/Hanice404/md-reader-pro/releases/latest)，下载 `md-reader-pro-v1.0.1.zip`。
 2. 解压到任意目录（压缩包根目录包含 `manifest.json`）。
 3. 打开 `chrome://extensions`（Edge 为 `edge://extensions`），开启右上角的 **开发者模式**。
 4. 点击 **加载已解压的扩展程序**，选择解压后的文件夹。
@@ -170,7 +170,7 @@ npm run build
 | `npm run build` | 构建到 `dist/`，并校验 manifest 引用的文件是否存在 |
 | `npm run dev` | 监听源码变化，增量构建（开发用，含 sourcemap） |
 | `npm test` | Puppeteer 端到端测试（见下方说明） |
-| `npm run zip` | 把 `dist/` 打包为 `release/md-reader-pro-v1.0.0.zip` |
+| `npm run zip` | 把 `dist/` 打包为 `release/md-reader-pro-v1.0.1.zip` |
 | `npm run icons` | 由 `scripts/icons.mjs` 重新生成图标（需要 Python + Pillow） |
 
 端到端测试使用 **Chrome for Testing**（品牌版 Chrome 会忽略 `--load-extension`，无法加载未打包扩展）。首次运行：
@@ -180,7 +180,7 @@ npx @puppeteer/browsers install chrome@stable --path .chrome
 npm test          # 自动使用 .chrome/ 下的 Chrome for Testing
 ```
 
-也可以用 `CHROME_PATH="/path/to/chrome" npm test` 指定其他 Chromium 构建。测试会启动真实浏览器、加载 `dist/` 扩展，覆盖自动渲染、检测矩阵、本地文件、XSS 清洗、Mermaid/KaTeX、主题、设置同步、移动端与打印样式等 91 项检查。
+也可以用 `CHROME_PATH="/path/to/chrome" npm test` 指定其他 Chromium 构建。测试会启动真实浏览器、加载 `dist/` 扩展，覆盖自动渲染、检测矩阵、本地文件、XSS 清洗、Mermaid/KaTeX、主题、设置同步、移动端与打印样式等 96 项检查。
 
 构建产物结构：
 

@@ -361,6 +361,67 @@ async function main() {
     const scrolled = await page.evaluate(() => (document.querySelector('.md-main')?.scrollTop || 0) > 100);
     check('TOC navigation scrolls', scrolled, tocTarget || '');
 
+    // TOC: single-line labels + resizable sidebar (max 50% viewport).
+    const tocLine = await page.$eval('.md-toc-link', (el) => {
+      const style = getComputedStyle(el);
+      return { whiteSpace: style.whiteSpace, overflow: style.textOverflow };
+    });
+    check('TOC titles stay on one line with ellipsis', tocLine.whiteSpace === 'nowrap' && tocLine.overflow === 'ellipsis', JSON.stringify(tocLine));
+
+    const handle = await page.$('.md-sidebar-resizer');
+    const handleBox = await handle.boundingBox();
+    await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + 240);
+    await page.mouse.down();
+    await page.mouse.move(400, handleBox.y + 240, { steps: 5 });
+    await page.mouse.up();
+    await wait(300);
+    const dragged = await page.evaluate(() => ({
+      width: document.querySelector('.md-sidebar').getBoundingClientRect().width,
+      stored: document.querySelector('.md-app').style.getPropertyValue('--md-sidebar-width'),
+    }));
+    check('TOC width can be dragged wider', dragged.width >= 380, JSON.stringify(dragged));
+
+    const wideHandle = await (await page.$('.md-sidebar-resizer')).boundingBox();
+    await page.mouse.move(wideHandle.x + wideHandle.width / 2, wideHandle.y + 240);
+    await page.mouse.down();
+    await page.mouse.move(900, wideHandle.y + 240, { steps: 5 });
+    await page.mouse.up();
+    await wait(300);
+    const capped = await page.evaluate(() => ({
+      width: document.querySelector('.md-sidebar').getBoundingClientRect().width,
+      viewport: window.innerWidth,
+    }));
+    check('TOC width caps at 50% of viewport', capped.width <= capped.viewport / 2 + 2, JSON.stringify(capped));
+
+    const resizedHandle = await (await page.$('.md-sidebar-resizer')).boundingBox();
+    const resetX = resizedHandle.x + resizedHandle.width / 2;
+    const resetY = resizedHandle.y + 240;
+    await page.mouse.click(resetX, resetY);
+    await wait(100);
+    await page.mouse.click(resetX, resetY);
+    await wait(300);
+    const resetWidth = await page.evaluate(() => document.querySelector('.md-sidebar').getBoundingClientRect().width);
+    check('double-click resets TOC width', Math.abs(resetWidth - 272) <= 2, String(resetWidth));
+
+    // Width persists across reloads.
+    const persistHandle = await (await page.$('.md-sidebar-resizer')).boundingBox();
+    await page.mouse.move(persistHandle.x + persistHandle.width / 2, persistHandle.y + 240);
+    await page.mouse.down();
+    await page.mouse.move(360, persistHandle.y + 240, { steps: 5 });
+    await page.mouse.up();
+    await wait(500);
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await waitForArticle(page);
+    const persistedWidth = await page.evaluate(
+      () => document.querySelector('.md-sidebar').getBoundingClientRect().width,
+    );
+    check('TOC width persists across reload', Math.abs(persistedWidth - 360) <= 3, String(persistedWidth));
+    const resetHandle = await (await page.$('.md-sidebar-resizer')).boundingBox();
+    await page.mouse.click(resetHandle.x + resetHandle.width / 2, resetHandle.y + 240);
+    await wait(100);
+    await page.mouse.click(resetHandle.x + resetHandle.width / 2, resetHandle.y + 240);
+    await wait(300);
+
     // Font zoom control: percentage between − / +, click resets to 100%.
     const zoomStart = await page.$eval('.md-zoom', (el) => el.textContent.trim());
     check('zoom starts at 100%', zoomStart === '100%', zoomStart);
@@ -482,7 +543,7 @@ async function main() {
     }));
     check('options sections present', options.cards >= 6, String(options.cards));
     check('options switches present', options.switches >= 10, String(options.switches));
-    check('version shown', /v1\.0\.0/.test(options.version || ''), options.version || '');
+    check('version shown', /v\d+\.\d+\.\d+/.test(options.version || ''), options.version || '');
     await page.screenshot({ path: path.join(shots, '08-options.png'), fullPage: true });
 
     // Options controls actually persist through chrome.storage.
