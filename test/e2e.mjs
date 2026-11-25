@@ -425,23 +425,31 @@ async function main() {
     // Reading progress pill: lives in the toolbar meta, right of reading time.
     const progressMeta = await page.evaluate(() => {
       const pill = document.querySelector('.md-doc-progress');
+      const prev = pill?.previousElementSibling;
+      const style = pill ? getComputedStyle(pill) : null;
       return {
         exists: Boolean(pill),
         hidden: pill ? pill.hidden : true,
         text: pill ? pill.textContent.trim() : '',
-        previous: pill?.previousElementSibling?.textContent || '',
+        previousIsDot: Boolean(prev?.classList?.contains('md-dot')),
+        beforeDot: prev?.previousElementSibling?.textContent || '',
         inMeta: Boolean(pill?.closest('.md-doc-meta')),
         oldSidebarPill: Boolean(document.querySelector('.md-sidebar-progress')),
+        background: style?.backgroundColor || '',
+        border: style?.borderTopWidth || '',
       };
     });
     check(
-      'reading progress pill sits right of reading time',
+      'reading progress is plain text right of reading time',
       progressMeta.exists &&
         !progressMeta.hidden &&
         /%/.test(progressMeta.text) &&
-        /(分钟|min)/.test(progressMeta.previous) &&
+        progressMeta.previousIsDot &&
+        /(分钟|min)/.test(progressMeta.beforeDot) &&
         progressMeta.inMeta &&
-        !progressMeta.oldSidebarPill,
+        !progressMeta.oldSidebarPill &&
+        progressMeta.background === 'rgba(0, 0, 0, 0)' &&
+        progressMeta.border === '0px',
       JSON.stringify(progressMeta),
     );
 

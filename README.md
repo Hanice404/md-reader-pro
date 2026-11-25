@@ -12,7 +12,7 @@
 
 MD Reader Pro 是一个完全离线的 Chrome 扩展：打开 `.md` 链接、本地 Markdown 文件或任意纯文本页面，即可获得带目录、代码高亮、数学公式、Mermaid 图表和多套主题的阅读界面。所有解析与渲染都在本地完成，文档内容不会离开你的浏览器。
 
-**版本：** v1.0.2 ｜ **兼容：** Chrome 110+ / Edge 110+（Chromium 内核，不支持 Firefox）
+**版本：** v1.0.3 ｜ **兼容：** Chrome 110+ / Edge 110+（Chromium 内核，不支持 Firefox）
 
 ## 截图
 
@@ -50,7 +50,7 @@ MD Reader Pro 是一个完全离线的 Chrome 扩展：打开 `.md` 链接、本
 
 ### 方式一：下载 Release（推荐）
 
-1. 打开 [Releases](https://github.com/Hanice404/md-reader-pro/releases/latest)，下载 `md-reader-pro-v1.0.2.zip`。
+1. 打开 [Releases](https://github.com/Hanice404/md-reader-pro/releases/latest)，下载 `md-reader-pro-v1.0.3.zip`。
 2. 解压到任意目录（压缩包根目录包含 `manifest.json`）。
 3. 打开 `chrome://extensions`（Edge 为 `edge://extensions`），开启右上角的 **开发者模式**。
 4. 点击 **加载已解压的扩展程序**，选择解压后的文件夹。
@@ -170,7 +170,7 @@ npm run build
 | `npm run build` | 构建到 `dist/`，并校验 manifest 引用的文件是否存在 |
 | `npm run dev` | 监听源码变化，增量构建（开发用，含 sourcemap） |
 | `npm test` | Puppeteer 端到端测试（见下方说明） |
-| `npm run zip` | 把 `dist/` 打包为 `release/md-reader-pro-v1.0.2.zip` |
+| `npm run zip` | 把 `dist/` 打包为 `release/md-reader-pro-v1.0.3.zip` |
 | `npm run icons` | 由 `scripts/icons.mjs` 重新生成图标（需要 Python + Pillow） |
 
 端到端测试使用 **Chrome for Testing**（品牌版 Chrome 会忽略 `--load-extension`，无法加载未打包扩展）。首次运行：

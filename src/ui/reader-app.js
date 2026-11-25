@@ -634,7 +634,7 @@ export async function mountReaderApp({
     if (meta.wordCount) addMeta(h('span', { text: t('wordCount', { count: meta.wordCount }) }));
     if (meta.readingMinutes) {
       addMeta(h('span', { text: t('readingTime', { minutes: meta.readingMinutes }) }));
-      metaNodes.push(docProgress);
+      addMeta(docProgress);
     }
     if (meta.hasMath) addMeta(h('span', { text: 'KaTeX' }));
     if (meta.hasMermaid) addMeta(h('span', { text: 'Mermaid' }));

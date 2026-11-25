@@ -2,6 +2,15 @@
 
 All notable changes to **MD Reader Pro** are documented here.
 
+## [1.0.3] — 2026-11-25
+
+### Changed
+
+- The reading-progress percentage is now plain text (no capsule background or border) in the toolbar metadata.
+- All metadata separators, including the one before the progress percentage, use the same small dot.
+
+[1.0.3]: https://github.com/Hanice404/md-reader-pro/releases/tag/v1.0.3
+
 ## [1.0.2] — 2026-11-25
 
 ### Changed

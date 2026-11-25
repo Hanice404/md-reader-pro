@@ -118,20 +118,17 @@
 }
 
 .md-doc-progress {
-  display: inline-flex;
-  align-items: center;
-  margin-left: 7px;
-  padding: 1px 7px;
-  border: 1px solid var(--md-border);
-  border-radius: var(--md-radius-pill);
-  background: var(--md-surface-muted);
-  color: var(--md-muted);
-  font-family: var(--md-font-mono);
-  font-size: 10px;
-  font-weight: 500;
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
   font-variant-numeric: tabular-nums;
-  line-height: 1.7;
-  vertical-align: middle;
+  line-height: inherit;
   white-space: nowrap;
 }
 
